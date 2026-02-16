@@ -1,0 +1,41 @@
+{% extends "users/auth_base.html" %}
+{% load socialaccount %}
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-shell single">
+    <section class="auth-card">
+        <h2>WELCOME</h2>
+        <p class="sub">Join us today!!</p>
+
+        <div class="socials">
+            <a class="social-btn" href="{% provider_login_url 'google' %}">
+                <i class="fa-brands fa-google"></i>
+            </a>
+            <button type="button"><i class="fa-brands fa-apple"></i></button>
+            <button type="button"><i class="fa-brands fa-facebook-f"></i></button>
+            <button type="button"><i class="fa-brands fa-twitter"></i></button>
+        </div>
+
+        <div class="divider">Signup via Email</div>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button class="auth-btn" type="submit">Signup</button>
+        </form>
+
+        <div class="auth-footer">
+            Already have an account? <a href="{% url 'login' %}">Login</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

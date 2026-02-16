@@ -1,0 +1,42 @@
+{% extends "users/auth_base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<div class="auth-shell single">
+    <section class="auth-card">
+        <h1>WELCOME</h1>
+        <p class="sub">Login to continue</p>
+
+        <div class="socials">
+            <button type="button"><i class="fa-brands fa-google"></i></button>
+            <button type="button"><i class="fa-brands fa-apple"></i></button>
+            <button type="button"><i class="fa-brands fa-facebook-f"></i></button>
+            <button type="button"><i class="fa-brands fa-twitter"></i></button>
+        </div>
+
+        <div class="divider">Login via Email</div>
+
+        <form method="POST">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="field-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            {% if form.non_field_errors %}
+                <div class="error">{{ form.non_field_errors|striptags }}</div>
+            {% endif %}
+            <button class="auth-btn" type="submit">Login</button>
+        </form>
+
+        <div class="auth-footer">
+            Don’t have an account? <a href="{% url 'signup' %}">Sign up</a>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+    <title>Project Learning Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap"
+    />
+    <style>
+        :root {
+            --ink: #0c0d0f;
+            --muted: #5b5f66;
+            --accent: #ff6f3d;
+            --accent-dark: #e05527;
+            --surface: #ffffff;
+            --stroke: #e7e3df;
+            --bg: #f8f4ef;
+            --glow-a: #ffe8db;
+            --glow-b: #e8f4ff;
+        }
+        [data-theme="dark"] {
+            --ink: #f4f6f8;
+            --muted: #b7bdc5;
+            --accent: #ff8a5b;
+            --accent-dark: #ff6f3d;
+            --surface: #14181c;
+            --stroke: #2a2f36;
+            --bg: #0c0f12;
+            --glow-a: rgba(255, 111, 61, 0.22);
+            --glow-b: rgba(93, 173, 255, 0.2);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--ink);
+            background: radial-gradient(900px 480px at 15% -5%, var(--glow-a) 0, transparent 62%),
+                radial-gradient(700px 420px at 90% 8%, var(--glow-b) 0, transparent 60%),
+                var(--bg);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 30%);
+            pointer-events: none;
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 4px 18px;
+            background: rgba(255, 255, 255, 0.35);
+            border-bottom: 1px solid var(--stroke);
+            backdrop-filter: blur(12px);
+            margin-bottom: 28px;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .brand-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1f2937, #0f172a);
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 16px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .nav-links a {
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.2s ease, border-color 0.2s ease;
+        }
+        .nav-links a:hover {
+            color: var(--ink);
+            border-color: var(--accent);
+        }
+        .nav-login {
+            border: 1px solid var(--stroke);
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--surface);
+            font-weight: 600;
+            color: var(--ink);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nav-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            align-items: center;
+            margin-top: 18px;
+            text-align: center;
+        }
+        .hero-text h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 46px;
+            margin: 8px 0 12px;
+            line-height: 1.06;
+        }
+        .hero-text p {
+            color: var(--muted);
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 0 0 22px;
+        }
+        .eyebrow {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--ink);
+            font-weight: 700;
+        }
+        .hero-actions {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 22px;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 14px 30px rgba(255, 111, 61, 0.35);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 36px rgba(255, 111, 61, 0.45);
+        }
+        .btn-ghost {
+            border: 1px solid var(--stroke);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-weight: 600;
+            color: var(--ink);
+            background: rgba(255, 255, 255, 0.7);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .btn-ghost:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.12);
+        }
+        [data-theme="dark"] .btn-ghost {
+            background: rgba(20, 24, 28, 0.85);
+        }
+        .hero-card {
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 18px;
+            padding: 20px;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        }
+        .hero-card h3 {
+            margin: 0 0 8px;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .hero-card ul {
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+        .hero-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 24px;
+        }
+        .meta-box {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid var(--stroke);
+            padding: 12px 14px;
+            border-radius: 14px;
+            text-align: center;
+        }
+        [data-theme="dark"] .meta-box {
+            background: rgba(20, 24, 28, 0.85);
+        }
+        .meta-box strong {
+            font-size: 18px;
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        section.section-block {
+            margin-top: 48px;
+            padding: 32px 28px;
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 18px;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        section.section-block:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.12);
+        }
+        [data-theme="dark"] section.section-block {
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+        }
+        section h2 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        .category-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .view-all {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-dark);
+        }
+        .view-all:hover {
+            text-decoration: underline;
+        }
+        .category-group {
+            margin-top: 26px;
+        }
+        .category-group:first-of-type {
+            margin-top: 18px;
+        }
+        .category-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 20px;
+            margin: 0;
+        }
+        .section-sub {
+            color: var(--muted);
+            max-width: 680px;
+            line-height: 1.6;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+            margin-top: 20px;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 28px rgba(15, 23, 42, 0.14);
+        }
+        .card h4 {
+            margin: 0 0 6px;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .card .category {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent-dark);
+            font-weight: 700;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .card .card-link {
+            display: inline-flex;
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-dark);
+        }
+        .card .card-link:hover {
+            text-decoration: underline;
+        }
+        .card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px; 
+            margin-top: 12px;
+        }
+        .card .tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--muted);
+        }
+        [data-theme="dark"] .card .tag {
+            background: rgba(20, 24, 28, 0.85);
+        }
+        .workflow {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 22px;
+        }
+        .step {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px dashed #d7d3cf;
+            border-radius: 14px;
+        }
+        [data-theme="dark"] .step {
+            background: rgba(20, 24, 28, 0.9);
+            border-color: #2f353d;
+        }
+        .step span {
+            font-size: 12px;
+            color: var(--accent-dark);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .step h5 {
+            margin: 8px 0 6px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 16px;
+        }
+        .step p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .fade-up {
+            animation: rise 0.6s ease both;
+        }
+                .theme-toggle {
+                    border: 1px solid var(--stroke);
+                    background: var(--surface);
+                    color: var(--ink);
+                    padding: 8px 14px;
+                    border-radius: 999px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: transform 0.2s ease, box-shadow 0.2s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                }
+                .theme-toggle svg {
+                    width: 16px;
+                    height: 16px;
+                    display: block;
+                }
+                .theme-toggle .icon-sun {
+                    display: none;
+                }
+                [data-theme="dark"] .theme-toggle .icon-sun {
+                    display: block;
+                }
+                [data-theme="dark"] .theme-toggle .icon-moon {
+                    display: none;
+                }
+                .theme-toggle:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+                }
+                .scroll-top {
+                    position: fixed;
+                    right: 20px;
+                    bottom: 24px;
+                    border: 1px solid var(--stroke);
+                    background: var(--surface);
+                    color: var(--ink);
+                    border-radius: 50%;
+                    width: 42px;
+                    height: 42px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.16);
+                    opacity: 0;
+                    transform: translateY(10px);
+                    pointer-events: none;
+                    transition: opacity 0.2s ease, transform 0.2s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .scroll-top svg {
+                    width: 18px;
+                    height: 18px;
+                }
+                .scroll-top.show {
+                    opacity: 1;
+                    transform: translateY(0);
+                    pointer-events: auto;
+                }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        @keyframes rise {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 960px) {
+            .hero-meta {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .workflow {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            .nav {
+                flex-direction: column;
+                gap: 12px;
+                padding: 16px 8px 18px;
+            }
+            .nav-right {
+                flex-direction: column;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            .hero-text h1 {
+                font-size: 36px;
+            }
+            .workflow {
+                grid-template-columns: 1fr;
+            }
+            .hero-meta {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <nav class="nav">
+            <div class="brand">
+                <div class="brand-badge">RM</div>
+                <span>RecoMagic</span>
+            </div>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="#project-library">Project Library</a>
+                    <a href="#resources">Resources</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'profile_edit' %}">Profile</a>
+                        <a href="{% url 'my_projects' %}">My Projects</a>
+                    {% endif %}
+                </div>
+                {% if user.is_authenticated %}
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="nav-login" type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a class="nav-login" href="{% url 'login' %}">Log in</a>
+                    <a class="nav-login" href="{% url 'signup' %}">Sign up</a>
+                {% endif %}
+                <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                    </svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="hero-text fade-up">
+                <div class="eyebrow">Personalized project learning</div>
+                <h1>Build the right projects for the career you want.</h1>
+                <p>Stop guessing what to build next. We match you with projects based on your role, skill level, and interests so every hour moves you forward.</p>
+                <div class="hero-actions">
+                    <a class="btn-primary" href="{% url 'signup' %}">Get started</a>
+                    <a class="btn-ghost" href="#library">Explore library</a>
+                </div>
+            </div>
+        </header>
+
+        <section class="section-block fade-up">
+            <h2>Learning Highlights</h2>
+            <p class="section-sub">A quick snapshot of the guided structure you will follow.</p>
+            <div class="hero-meta">
+                <div class="meta-box">
+                    <strong>120+</strong>
+                    <span>Guided projects</span>
+                </div>
+                <div class="meta-box">
+                    <strong>6</strong>
+                    <span>Learning tracks</span>
+                </div>
+                <div class="meta-box">
+                    <strong>Stepwise</strong>
+                    <span>Progress tracking</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block fade-up delay-1">
+            <h2>Project Showcase</h2>
+            <p class="section-sub">Browse sample projects grouped by category to see what your learning path could include.</p>
+
+            <div class="category-group">
+                <div class="category-head">
+                    <h3 class="category-title">AI Projects</h3>
+                    <a class="view-all" href="{% url 'projects' %}">View all projects</a>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Resume Matcher</h4>
+                        <p>Score resumes against job descriptions using embeddings.</p>
+                        <div class="tags">
+                            <span class="tag">NLP</span>
+                            <span class="tag">Vector Search</span>
+                            <span class="tag">Python</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Customer Support Copilot</h4>
+                        <p>Summarize tickets and suggest responses with LLMs.</p>
+                        <div class="tags">
+                            <span class="tag">LLM</span>
+                            <span class="tag">RAG</span>
+                            <span class="tag">Workflow</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Visual Quality Inspector</h4>
+                        <p>Detect product defects using image classification.</p>
+                        <div class="tags">
+                            <span class="tag">Computer Vision</span>
+                            <span class="tag">CNN</span>
+                            <span class="tag">MLOps</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <div class="category-head">
+                    <h3 class="category-title">Data Science Projects</h3>
+                    <a class="view-all" href="{% url 'projects' %}">View all projects</a>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Sales Insight Dashboard</h4>
+                        <p>Analyze revenue, cohorts, and growth trends with visuals.</p>
+                        <div class="tags">
+                            <span class="tag">Pandas</span>
+                            <span class="tag">BI</span>
+                            <span class="tag">Metrics</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Customer Churn Model</h4>
+                        <p>Predict churn risk and highlight retention levers.</p>
+                        <div class="tags">
+                            <span class="tag">Classification</span>
+                            <span class="tag">Feature Eng</span>
+                            <span class="tag">Python</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Price Elasticity Study</h4>
+                        <p>Measure demand sensitivity using regression models.</p>
+                        <div class="tags">
+                            <span class="tag">Regression</span>
+                            <span class="tag">Econometrics</span>
+                            <span class="tag">Forecasting</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <div class="category-head">
+                    <h3 class="category-title">Web Development Projects</h3>
+                    <a class="view-all" href="{% url 'projects' %}">View all projects</a>
+                </div>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Job Board API</h4>
+                        <p>Create a REST API with auth, filtering, and role-based access.</p>
+                        <div class="tags">
+                            <span class="tag">Django</span>
+                            <span class="tag">REST</span>
+                            <span class="tag">JWT</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Portfolio Builder</h4>
+                        <p>Design a responsive site builder with templates and previews.</p>
+                        <div class="tags">
+                            <span class="tag">React</span>
+                            <span class="tag">UI</span>
+                            <span class="tag">Responsive</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Freelance CRM</h4>
+                        <p>Manage clients, invoices, and email workflows.</p>
+                        <div class="tags">
+                            <span class="tag">PostgreSQL</span>
+                            <span class="tag">Email</span>
+                            <span class="tag">SaaS</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="resources" class="section-block fade-up delay-2">
+            <h2>Resources</h2>
+            <p class="section-sub">Short guides, templates, and checklists to keep your projects clean, scoped, and portfolio ready.</p>
+            <div class="grid">
+                <div class="card">
+                    <h4>Project briefs</h4>
+                    <p>Clear problem statements and success criteria.</p>
+                </div>
+                <div class="card">
+                    <h4>Skill maps</h4>
+                    <p>See which competencies each project develops.</p>
+                </div>
+                <div class="card">
+                    <h4>Delivery checklists</h4>
+                    <p>Ship with confidence using QA and deployment steps.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block fade-up delay-3">
+            <h2>How it works</h2>
+            <p class="section-sub">A focused path from onboarding to project completion and next recommendations.</p>
+            <div class="workflow">
+                <div class="step">
+                    <span>Step 1</span>
+                    <h5>Complete your profile</h5>
+                    <p>Tell us your goals, stack, and skill level.</p>
+                </div>
+                <div class="step">
+                    <span>Step 2</span>
+                    <h5>Get matched</h5>
+                    <p>Receive ranked projects that fit your path.</p>
+                </div>
+                <div class="step">
+                    <span>Step 3</span>
+                    <h5>Build in phases</h5>
+                    <p>Follow structured tasks and track progress.</p>
+                </div>
+                <div class="step">
+                    <span>Step 4</span>
+                    <h5>Advance</h5>
+                    <p>Finish and unlock the next recommendation.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+    <button class="scroll-top" type="button" aria-label="Back to top" data-scroll-top>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 19V5" />
+            <path d="M5 12l7-7 7 7" />
+        </svg>
+    </button>
+    <script>
+        const root = document.documentElement;
+        const toggle = document.querySelector("[data-theme-toggle]");
+        const scrollTopButton = document.querySelector("[data-scroll-top]");
+
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme) {
+            root.setAttribute("data-theme", storedTheme);
+        }
+
+        const setToggleLabel = () => {
+            const isDark = root.getAttribute("data-theme") === "dark";
+            toggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+        };
+
+        setToggleLabel();
+
+        toggle.addEventListener("click", () => {
+            const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            root.setAttribute("data-theme", nextTheme);
+            localStorage.setItem("theme", nextTheme);
+            setToggleLabel();
+        });
+
+        const onScroll = () => {
+            if (window.scrollY > 300) {
+                scrollTopButton.classList.add("show");
+            } else {
+                scrollTopButton.classList.remove("show");
+            }
+        };
+
+        scrollTopButton.addEventListener("click", () => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        window.addEventListener("scroll", onScroll);
+        onScroll();
+    </script>
+</body>
+</html>

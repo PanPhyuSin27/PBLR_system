@@ -1,0 +1,12 @@
+{% extends "users/auth_base.html" %}
+{% load i18n %}
+
+{% block title %}{% trans "Social Login" %}{% endblock %}
+
+{% block content %}
+    <div class="auth-shell single">
+        <section class="auth-card">
+            {% block inner %}{% endblock %}
+        </section>
+    </div>
+{% endblock %}

@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html data-theme="light">
+<head>
+    <title>All Projects</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap"
+    />
+    <style>
+        :root {
+            --ink: #0c0d0f;
+            --muted: #5b5f66;
+            --accent: #ff6f3d;
+            --accent-dark: #e05527;
+            --surface: #ffffff;
+            --stroke: #e7e3df;
+            --bg: #f8f4ef;
+            --glow-a: #ffe8db;
+            --glow-b: #e8f4ff;
+        }
+        [data-theme="dark"] {
+            --ink: #f4f6f8;
+            --muted: #b7bdc5;
+            --accent: #ff8a5b;
+            --accent-dark: #ff6f3d;
+            --surface: #14181c;
+            --stroke: #2a2f36;
+            --bg: #0c0f12;
+            --glow-a: rgba(255, 111, 61, 0.22);
+            --glow-b: rgba(93, 173, 255, 0.2);
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            font-family: "Manrope", sans-serif;
+            color: var(--ink);
+            background: radial-gradient(900px 480px at 15% -5%, var(--glow-a) 0, transparent 62%),
+                radial-gradient(700px 420px at 90% 8%, var(--glow-b) 0, transparent 60%),
+                var(--bg);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 30%);
+            pointer-events: none;
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 28px 24px 80px;
+            position: relative;
+            z-index: 1;
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0 28px;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .brand-badge {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #1f2937, #0f172a);
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-size: 16px;
+        }
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            align-items: center;
+            font-size: 14px;
+            color: var(--muted);
+        }
+        .nav-links a:hover {
+            color: var(--ink);
+        }
+        .nav-login {
+            border: 1px solid var(--stroke);
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: var(--surface);
+            font-weight: 600;
+            color: var(--ink);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .nav-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+        .theme-toggle {
+            border: 1px solid var(--stroke);
+            background: var(--surface);
+            color: var(--ink);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+        .theme-toggle .icon-sun {
+            display: none;
+        }
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: block;
+        }
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: none;
+        }
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+        }
+        .section-block {
+            margin-top: 24px;
+            padding: 32px 28px;
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 18px;
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+        }
+        [data-theme="dark"] .section-block {
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.35);
+        }
+        h1 {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 34px;
+            margin: 0 0 10px;
+        }
+        .section-sub {
+            color: var(--muted);
+            max-width: 760px;
+            line-height: 1.6;
+            margin: 0 0 18px;
+        }
+        .category-group {
+            margin-top: 26px;
+        }
+        .category-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 20px;
+            margin: 0 0 12px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 18px;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+        }
+        .card h4 {
+            margin: 0 0 6px;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .card p {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.5;
+        }
+        .card .tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        .card .tag {
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 999px;
+            border: 1px solid var(--stroke);
+            background: rgba(255, 255, 255, 0.7);
+            color: var(--muted);
+        }
+        [data-theme="dark"] .card .tag {
+            background: rgba(20, 24, 28, 0.85);
+        }
+        .card .card-link {
+            display: inline-flex;
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-dark);
+        }
+        .card .card-link:hover {
+            text-decoration: underline;
+        }
+        @media (max-width: 960px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 640px) {
+            .nav {
+                flex-direction: column;
+                gap: 16px;
+            }
+            .nav-right {
+                flex-direction: column;
+            }
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <nav class="nav">
+            <div class="brand">
+                <div class="brand-badge">RM</div>
+                <span>RecoMagic</span>
+            </div>
+            <div class="nav-right">
+                <div class="nav-links">
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'signup' %}">Get started</a>
+                </div>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'profile_edit' %}">Profile</a>
+                    <a href="{% url 'my_projects' %}">My Projects</a>
+                    <form method="post" action="{% url 'logout' %}">
+                        {% csrf_token %}
+                        <button class="nav-login" type="submit">Logout</button>
+                    </form>
+                {% else %}
+                    <a class="nav-login" href="{% url 'login' %}">Log in</a>
+                    <a class="nav-login" href="{% url 'signup' %}">Sign up</a>
+                {% endif %}
+                <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                    </svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                </button>
+            </div>
+        </nav>
+
+        <section class="section-block">
+            <h1>All Projects</h1>
+            <p class="section-sub">Explore every sample project across categories. Click a project to view details and sign up.</p>
+
+            <div class="category-group">
+                <h3 class="category-title">AI Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Resume Matcher</h4>
+                        <p>Score resumes against job descriptions using embeddings.</p>
+                        <div class="tags">
+                            <span class="tag">NLP</span>
+                            <span class="tag">Vector Search</span>
+                            <span class="tag">Python</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Customer Support Copilot</h4>
+                        <p>Summarize tickets and suggest responses with LLMs.</p>
+                        <div class="tags">
+                            <span class="tag">LLM</span>
+                            <span class="tag">RAG</span>
+                            <span class="tag">Workflow</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Visual Quality Inspector</h4>
+                        <p>Detect product defects using image classification.</p>
+                        <div class="tags">
+                            <span class="tag">Computer Vision</span>
+                            <span class="tag">CNN</span>
+                            <span class="tag">MLOps</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Smart Meeting Notes</h4>
+                        <p>Transcribe and extract action items automatically.</p>
+                        <div class="tags">
+                            <span class="tag">ASR</span>
+                            <span class="tag">Summarization</span>
+                            <span class="tag">Productivity</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <h3 class="category-title">Data Science Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Sales Insight Dashboard</h4>
+                        <p>Analyze revenue, cohorts, and growth trends with visuals.</p>
+                        <div class="tags">
+                            <span class="tag">Pandas</span>
+                            <span class="tag">BI</span>
+                            <span class="tag">Metrics</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Customer Churn Model</h4>
+                        <p>Predict churn risk and highlight retention levers.</p>
+                        <div class="tags">
+                            <span class="tag">Classification</span>
+                            <span class="tag">Feature Eng</span>
+                            <span class="tag">Python</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Price Elasticity Study</h4>
+                        <p>Measure demand sensitivity using regression models.</p>
+                        <div class="tags">
+                            <span class="tag">Regression</span>
+                            <span class="tag">Econometrics</span>
+                            <span class="tag">Forecasting</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>A/B Test Analyzer</h4>
+                        <p>Automate experiment results and significance checks.</p>
+                        <div class="tags">
+                            <span class="tag">Stats</span>
+                            <span class="tag">Experimentation</span>
+                            <span class="tag">Reporting</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <h3 class="category-title">Web Development Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Job Board API</h4>
+                        <p>Create a REST API with auth, filtering, and role-based access.</p>
+                        <div class="tags">
+                            <span class="tag">Django</span>
+                            <span class="tag">REST</span>
+                            <span class="tag">JWT</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Portfolio Builder</h4>
+                        <p>Design a responsive site builder with templates and previews.</p>
+                        <div class="tags">
+                            <span class="tag">React</span>
+                            <span class="tag">UI</span>
+                            <span class="tag">Responsive</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Freelance CRM</h4>
+                        <p>Manage clients, invoices, and email workflows.</p>
+                        <div class="tags">
+                            <span class="tag">PostgreSQL</span>
+                            <span class="tag">Email</span>
+                            <span class="tag">SaaS</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Event Booking Platform</h4>
+                        <p>Handle listings, ticketing, and secure checkout flows.</p>
+                        <div class="tags">
+                            <span class="tag">Stripe</span>
+                            <span class="tag">Payments</span>
+                            <span class="tag">UX</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <h3 class="category-title">Mobile Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Habit Coach App</h4>
+                        <p>Build streaks, reminders, and progress charts on mobile.</p>
+                        <div class="tags">
+                            <span class="tag">Flutter</span>
+                            <span class="tag">Charts</span>
+                            <span class="tag">Notifications</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Campus Navigator</h4>
+                        <p>Interactive maps with routing and accessibility layers.</p>
+                        <div class="tags">
+                            <span class="tag">Maps</span>
+                            <span class="tag">Geolocation</span>
+                            <span class="tag">UX</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Meal Planner</h4>
+                        <p>Plan weekly meals, track macros, and auto-generate lists.</p>
+                        <div class="tags">
+                            <span class="tag">Health</span>
+                            <span class="tag">Offline</span>
+                            <span class="tag">Sync</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Expense Tracker</h4>
+                        <p>Scan receipts and categorize spending on-device.</p>
+                        <div class="tags">
+                            <span class="tag">OCR</span>
+                            <span class="tag">FinTech</span>
+                            <span class="tag">Insights</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <h3 class="category-title">Cloud & DevOps Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Serverless Image API</h4>
+                        <p>Resize and optimize images with on-demand functions.</p>
+                        <div class="tags">
+                            <span class="tag">AWS</span>
+                            <span class="tag">Lambda</span>
+                            <span class="tag">S3</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>CI/CD Control Center</h4>
+                        <p>Monitor pipelines, deployments, and alerts.</p>
+                        <div class="tags">
+                            <span class="tag">Docker</span>
+                            <span class="tag">CI</span>
+                            <span class="tag">Observability</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Infra Cost Optimizer</h4>
+                        <p>Track cloud spend and flag underused services.</p>
+                        <div class="tags">
+                            <span class="tag">FinOps</span>
+                            <span class="tag">Dashboards</span>
+                            <span class="tag">Alerts</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Observability Starter Kit</h4>
+                        <p>Set up logs, traces, and SLO dashboards quickly.</p>
+                        <div class="tags">
+                            <span class="tag">OpenTelemetry</span>
+                            <span class="tag">SLO</span>
+                            <span class="tag">Grafana</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-group">
+                <h3 class="category-title">Cybersecurity Projects</h3>
+                <div class="grid">
+                    <div class="card">
+                        <h4>Phishing Detection</h4>
+                        <p>Detect suspicious URLs with ML features and heuristics.</p>
+                        <div class="tags">
+                            <span class="tag">Security</span>
+                            <span class="tag">ML</span>
+                            <span class="tag">Python</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Password Health Scanner</h4>
+                        <p>Audit password strength and policy compliance.</p>
+                        <div class="tags">
+                            <span class="tag">Policies</span>
+                            <span class="tag">Risk</span>
+                            <span class="tag">CLI</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Threat Log Explorer</h4>
+                        <p>Search security logs and flag anomalies.</p>
+                        <div class="tags">
+                            <span class="tag">SIEM</span>
+                            <span class="tag">Detection</span>
+                            <span class="tag">Analytics</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                    <div class="card">
+                        <h4>Secure File Vault</h4>
+                        <p>Encrypt files with key management and access auditing.</p>
+                        <div class="tags">
+                            <span class="tag">Encryption</span>
+                            <span class="tag">IAM</span>
+                            <span class="tag">Compliance</span>
+                        </div>
+                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <script>
+        const root = document.documentElement;
+        const toggle = document.querySelector("[data-theme-toggle]");
+
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme) {
+            root.setAttribute("data-theme", storedTheme);
+        }
+
+        const setToggleLabel = () => {
+            const isDark = root.getAttribute("data-theme") === "dark";
+            toggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+        };
+
+        setToggleLabel();
+
+        toggle.addEventListener("click", () => {
+            const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+            root.setAttribute("data-theme", nextTheme);
+            localStorage.setItem("theme", nextTheme);
+            setToggleLabel();
+        });
+    </script>
+</body>
+</html>

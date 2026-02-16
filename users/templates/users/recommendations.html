@@ -1,0 +1,37 @@
+{% extends "users/base.html" %}
+
+{% block title %}Recommendations{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Recommended Projects</h1>
+<p class="page-sub">Projects tailored to your profile and goals.</p>
+{% if ai_generated %}
+    <p class="helper-text">AI-generated suggestions based on your profile.</p>
+{% endif %}
+
+{% if not profile %}
+    <div class="empty-state">
+        <p>No profile yet. Add your details to generate recommendations.</p>
+        <a class="btn btn-primary" href="{% url 'profile_edit' %}">Create Profile</a>
+    </div>
+{% else %}
+    <div class="recommendations-grid">
+        {% for project in recommendations %}
+            <div class="rec-card">
+                <div class="rec-meta">{{ project.category }} • {{ project.difficulty|title }}</div>
+                <h3>{{ project.title }}</h3>
+                <p class="helper-text">{{ project.summary }}</p>
+                <div class="pill-list">
+                    {% for tag in project.stack %}
+                        <span class="pill">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                <div class="rec-actions">
+                    <a class="btn btn-primary" href="{% url 'start_recommendation' forloop.counter0 %}">Start project</a>
+                    <a class="btn" href="{% url 'profile_edit' %}">Refine profile</a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

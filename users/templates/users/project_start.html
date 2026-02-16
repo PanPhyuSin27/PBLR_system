@@ -1,0 +1,59 @@
+{% extends "users/base.html" %}
+
+{% block title %}Project Plan{% endblock %}
+
+{% block content %}
+
+<h1 class="page-title">{{ project.title }}</h1>
+<p class="page-sub">{{ project.category }} • {{ project.difficulty|title }}</p>
+<p class="helper-text">{{ project.summary }}</p>
+
+{% if ai_error %}
+    <div class="info-card">
+        <h3>AI plan unavailable</h3>
+        <p class="helper-text">We could not generate phases and tasks for this project. Try again.</p>
+        <div class="form-actions">
+            <a class="btn btn-primary" href="?regen=1">Try again</a>
+            <a class="btn" href="{% url 'recommendations' %}">Back to recommendations</a>
+        </div>
+    </div>
+{% else %}
+    <div class="progress-wrap">
+        <div class="helper-text">Progress: {{ completed_tasks }} / {{ total_tasks }} tasks</div>
+        <div class="progress-bar">
+            <span style="width: {{ progress_pct }}%;"></span>
+        </div>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for phase in phases %}
+            <div class="phase-card">
+                <h3>{{ phase.title }}</h3>
+                {% if phase.description %}
+                    <p class="helper-text">{{ phase.description }}</p>
+                {% endif %}
+                <ul class="task-list">
+                    {% for task in phase.tasks %}
+                        <li class="task-item">
+                            <input
+                                type="checkbox"
+                                name="task"
+                                value="{{ task.id }}"
+                                id="task-{{ task.id }}"
+                                {% if task.done %}checked{% endif %}
+                            />
+                            <label for="task-{{ task.id }}">{{ task.description }}</label>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+
+        <div class="form-actions">
+            <button class="btn btn-primary" type="submit">Update progress</button>
+            <a class="btn" href="{% url 'recommendations' %}">Back to recommendations</a>
+        </div>
+    </form>
+{% endif %}
+{% endblock %}

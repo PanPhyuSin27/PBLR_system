@@ -1,0 +1,50 @@
+{% extends "users/base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Your Profile</h1>
+<p class="page-sub">Keep your learning preferences up to date for better recommendations.</p>
+<div class="form-actions">
+    <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
+    <a class="btn" href="{% url 'profile_edit' %}">Edit Profile</a>
+</div>
+
+{% if profile %}
+    <div class="profile-grid">
+        <div class="info-card">
+            <span>Field</span>
+            <strong>{{ profile.field }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Target Role</span>
+            <strong>{{ profile.target_role }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Skill Level</span>
+            <strong>{{ profile.skill_level }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Tech Preference</span>
+            <strong>{{ profile.tech_preference }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Learning Goal</span>
+            <strong>{{ profile.learning_goal }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Interest Tags</span>
+            <strong>{{ profile.interest_tags }}</strong>
+        </div>
+        <div class="info-card">
+            <span>Learning Style</span>
+            <strong>{{ profile.learning_style|default:"Not set" }}</strong>
+        </div>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <p>No profile yet. Add your details to unlock tailored project recommendations.</p>
+        <a class="btn btn-primary" href="{% url 'profile_edit' %}">Create Profile</a>
+    </div>
+{% endif %}
+{% endblock %}

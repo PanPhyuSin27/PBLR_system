@@ -1,0 +1,40 @@
+{% extends 'users/base.html' %}
+
+{% block title %}My Projects{% endblock %}
+
+{% block content %}
+    <h1 class="page-title">My Projects</h1>
+    <p class="page-sub">Track your AI-generated project plans and progress.</p>
+
+    {% if projects %}
+        <div class="recommendations-grid">
+            {% for project in projects %}
+                <div class="rec-card">
+                    <div class="rec-meta">{{ project.category }} · {{ project.difficulty }}</div>
+                    <h3>{{ project.title }}</h3>
+                    <p class="helper-text">{{ project.summary }}</p>
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <span style="width: {{ project.progress_pct }}%"></span>
+                        </div>
+                        <div class="progress-meta">
+                            {{ project.completed_tasks }}/{{ project.total_tasks }} tasks completed
+                        </div>
+                    </div>
+                    <div class="rec-actions">
+                        <a class="btn btn-primary" href="{% url 'start_recommendation' project.index %}">Resume</a>
+                        <a class="btn" href="{% url 'start_recommendation' project.index %}?regen=1">Regenerate</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="info-card">
+            <h3>No projects yet</h3>
+            <p class="helper-text">Start a recommendation to generate your first AI project plan.</p>
+            <div class="form-actions">
+                <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
