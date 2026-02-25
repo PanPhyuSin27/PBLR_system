@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>{% block title %}PBL System{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,6 +7,7 @@
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap"
     />
+    {% block extra_styles %}{% endblock %}
     <style>
         :root {
             --ink: #0c0d0f;
@@ -15,6 +16,18 @@
             --surface: #ffffff;
             --stroke: #e7e3df;
             --bg: #f8f4ef;
+            --glow-a: #ffe8db;
+            --glow-b: #e8f4ff;
+        }
+        [data-theme="dark"] {
+            --ink: #f4f6f8;
+            --muted: #b7bdc5;
+            --accent: #ff8a5b;
+            --surface: #14181c;
+            --stroke: #2a2f36;
+            --bg: #0c0f12;
+            --glow-a: rgba(255, 111, 61, 0.22);
+            --glow-b: rgba(93, 173, 255, 0.2);
         }
         * {
             box-sizing: border-box;
@@ -23,8 +36,8 @@
             margin: 0;
             font-family: "Manrope", sans-serif;
             color: var(--ink);
-            background: radial-gradient(900px 480px at 15% -5%, #ffe8db 0, transparent 62%),
-                radial-gradient(700px 420px at 90% 8%, #e8f4ff 0, transparent 60%),
+            background: radial-gradient(900px 480px at 15% -5%, var(--glow-a) 0, transparent 62%),
+                radial-gradient(700px 420px at 90% 8%, var(--glow-b) 0, transparent 60%),
                 var(--bg);
         }
         a {
@@ -41,6 +54,15 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 0 24px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--stroke);
+        }
+        [data-theme="dark"] .nav {
+            background: rgba(15, 18, 21, 0.88);
         }
         .brand {
             display: flex;
@@ -67,6 +89,38 @@
             gap: 16px;
             font-size: 14px;
             color: var(--muted);
+        }
+        .theme-toggle {
+            border: 1px solid var(--stroke);
+            background: var(--surface);
+            color: var(--ink);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+        .theme-toggle .icon-sun {
+            display: none;
+        }
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: block;
+        }
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: none;
+        }
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
         }
         .nav-links a:hover,
         .nav-actions a:hover {
@@ -292,6 +346,15 @@
                     <a href="{% url 'login' %}">Login</a>
                     <a class="btn btn-primary" href="{% url 'signup' %}">Sign Up</a>
                 {% endif %}
+                <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                    </svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                </button>
             </div>
         </nav>
 
@@ -299,5 +362,34 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+    <script>
+        const root = document.documentElement;
+        const toggle = document.querySelector("[data-theme-toggle]");
+
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme) {
+            root.setAttribute("data-theme", storedTheme);
+        }
+
+        const setToggleLabel = () => {
+            if (!toggle) {
+                return;
+            }
+            const isDark = root.getAttribute("data-theme") === "dark";
+            toggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+        };
+
+        setToggleLabel();
+
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                root.setAttribute("data-theme", nextTheme);
+                localStorage.setItem("theme", nextTheme);
+                setToggleLabel();
+            });
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

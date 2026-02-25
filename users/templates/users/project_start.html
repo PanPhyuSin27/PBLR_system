@@ -2,6 +2,207 @@
 
 {% block title %}Project Plan{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .quest-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin: 18px 0 10px;
+    }
+    .quest-toolbar .btn {
+        font-size: 13px;
+    }
+    .quest-legend {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        color: var(--muted);
+        font-size: 12px;
+    }
+    .chip {
+        padding: 4px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        background: #fff;
+    }
+    .chip.todo {
+        color: #6b7280;
+        background: #f9fafb;
+    }
+    .chip.doing {
+        color: #b45309;
+        background: #fff7ed;
+        border-color: #fed7aa;
+    }
+    .chip.done {
+        color: #15803d;
+        background: #ecfdf3;
+        border-color: #bbf7d0;
+    }
+    .quest-list {
+        position: relative;
+        margin-top: 18px;
+        padding-left: 22px;
+        border-left: 2px dashed var(--stroke);
+        display: grid;
+        gap: 16px;
+    }
+    .phase-quest {
+        position: relative;
+        padding: 16px 18px 18px;
+        border-radius: 16px;
+        border: 1px solid var(--stroke);
+        background: #fff;
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    }
+    .phase-quest::before {
+        content: "";
+        position: absolute;
+        left: -31px;
+        top: 22px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 6px rgba(255, 111, 61, 0.2);
+    }
+    .phase-head {
+        display: flex;
+        gap: 16px;
+        align-items: flex-start;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+    .phase-badge {
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .phase-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .phase-body {
+        margin-top: 12px;
+    }
+    .phase-quest.collapsed .phase-body {
+        display: none;
+    }
+    .quest-tasks {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 10px;
+    }
+    .quest-task {
+        display: grid;
+        grid-template-columns: auto 1fr auto;
+        gap: 10px;
+        align-items: center;
+        padding: 10px 12px;
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        background: #fafafa;
+    }
+    .quest-task label {
+        cursor: pointer;
+    }
+    .quest-task input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+    .quest-task .steps-list,
+    .quest-task .learn-panel {
+        grid-column: 2 / -1;
+    }
+    .phase-resources {
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+    }
+    .resource-list {
+        margin: 8px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .steps-list {
+        margin: 8px 0 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        font-size: 13px;
+    }
+    .learn-panel {
+        margin-top: 8px;
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 8px 12px;
+        background: #fff;
+    }
+    .learn-panel summary {
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 13px;
+    }
+    .term-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 8px;
+    }
+    .term-pill {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        border: 1px solid var(--stroke);
+        color: var(--muted);
+        background: #f9fafb;
+    }
+    .celebrate-banner {
+        display: none;
+        margin-top: 14px;
+        padding: 12px 16px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #fff7ed, #ecfdf3);
+        border: 1px solid #fde68a;
+        font-weight: 600;
+        text-align: center;
+        animation: pop-in 0.4s ease;
+    }
+    .celebrate-banner.show {
+        display: block;
+    }
+    .progress-wrap.quest-progress {
+        position: relative;
+    }
+    .progress-wrap.quest-progress.complete .progress-bar span {
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    @keyframes pop-in {
+        from {
+            opacity: 0;
+            transform: translateY(6px) scale(0.98);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <h1 class="page-title">{{ project.title }}</h1>
@@ -12,43 +213,108 @@
     <div class="info-card">
         <h3>AI plan unavailable</h3>
         <p class="helper-text">We could not generate phases and tasks for this project. Try again.</p>
+        {% if ai_error_detail %}
+            <p class="helper-text">{{ ai_error_detail }}</p>
+        {% endif %}
         <div class="form-actions">
             <a class="btn btn-primary" href="?regen=1">Try again</a>
             <a class="btn" href="{% url 'recommendations' %}">Back to recommendations</a>
         </div>
     </div>
 {% else %}
-    <div class="progress-wrap">
+    <div class="quest-toolbar">
+        <div class="quest-legend">
+            <span class="chip todo">Todo</span>
+            <span class="chip doing">Doing</span>
+            <span class="chip done">Done</span>
+        </div>
+        <div class="phase-actions">
+            <button class="btn" type="button" data-action="expand-all">Expand all</button>
+            <button class="btn" type="button" data-action="collapse-all">Collapse all</button>
+        </div>
+    </div>
+
+    <div class="progress-wrap quest-progress" data-progress-wrap>
         <div class="helper-text">Progress: {{ completed_tasks }} / {{ total_tasks }} tasks</div>
         <div class="progress-bar">
             <span style="width: {{ progress_pct }}%;"></span>
         </div>
+        <div class="celebrate-banner" data-celebrate>Quest complete! You finished every task.</div>
     </div>
 
     <form method="post">
         {% csrf_token %}
-        {% for phase in phases %}
-            <div class="phase-card">
-                <h3>{{ phase.title }}</h3>
-                {% if phase.description %}
-                    <p class="helper-text">{{ phase.description }}</p>
-                {% endif %}
-                <ul class="task-list">
-                    {% for task in phase.tasks %}
-                        <li class="task-item">
-                            <input
-                                type="checkbox"
-                                name="task"
-                                value="{{ task.id }}"
-                                id="task-{{ task.id }}"
-                                {% if task.done %}checked{% endif %}
-                            />
-                            <label for="task-{{ task.id }}">{{ task.description }}</label>
-                        </li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
+        <div class="quest-list">
+            {% for phase in phases %}
+                <section class="phase-quest" data-phase>
+                    <div class="phase-head">
+                        <div>
+                            <div class="phase-badge">Phase {{ forloop.counter }}</div>
+                            <h3>{{ phase.title }}</h3>
+                            {% if phase.description %}
+                                <p class="helper-text">{{ phase.description }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="phase-actions">
+                            <span class="chip todo" data-phase-status>Todo</span>
+                            <button class="btn" type="button" data-action="toggle">Collapse</button>
+                            <button class="btn" type="button" data-action="mark-all">Mark all</button>
+                        </div>
+                    </div>
+                    <div class="phase-body">
+                        {% if show_guidance and phase.resources %}
+                            <div class="phase-resources">
+                                <strong>Phase resources</strong>
+                                <ul class="resource-list">
+                                    {% for resource in phase.resources %}
+                                        <li><a href="{{ resource.url }}" target="_blank" rel="noreferrer">{{ resource.title }}</a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        <ul class="quest-tasks">
+                            {% for task in phase.tasks %}
+                                <li class="quest-task" data-task>
+                                    <input
+                                        type="checkbox"
+                                        name="task"
+                                        value="{{ task.id }}"
+                                        id="task-{{ task.id }}"
+                                        {% if task.done %}checked{% endif %}
+                                    />
+                                    <label for="task-{{ task.id }}">{{ task.description }}</label>
+                                    <span class="chip todo" data-task-status>Todo</span>
+                                    {% if show_guidance and task.steps %}
+                                        <ul class="steps-list">
+                                            {% for step in task.steps %}
+                                                <li>{{ step }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                    {% if show_guidance %}
+                                        {% if task.learn or task.key_terms %}
+                                            <details class="learn-panel">
+                                                <summary>Quick learn</summary>
+                                                {% if task.learn %}
+                                                    <p class="helper-text">{{ task.learn }}</p>
+                                                {% endif %}
+                                                {% if task.key_terms %}
+                                                    <div class="term-list">
+                                                        {% for term in task.key_terms %}
+                                                            <span class="term-pill">{{ term }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                {% endif %}
+                                            </details>
+                                        {% endif %}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </section>
+            {% endfor %}
+        </div>
 
         <div class="form-actions">
             <button class="btn btn-primary" type="submit">Update progress</button>
@@ -56,4 +322,112 @@
         </div>
     </form>
 {% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const phases = Array.from(document.querySelectorAll("[data-phase]"));
+    const progressWrap = document.querySelector("[data-progress-wrap]");
+    const celebrate = document.querySelector("[data-celebrate]");
+
+    const setChipState = (chip, state) => {
+        chip.classList.remove("todo", "doing", "done");
+        chip.classList.add(state);
+        chip.textContent = state;
+    };
+
+    const updatePhaseStatus = (phase) => {
+        const checks = Array.from(phase.querySelectorAll("input[type='checkbox']"));
+        const done = checks.filter((input) => input.checked).length;
+        const status = phase.querySelector("[data-phase-status]");
+        if (!status) {
+            return;
+        }
+        if (done === 0) {
+            setChipState(status, "todo");
+        } else if (done === checks.length) {
+            setChipState(status, "done");
+        } else {
+            setChipState(status, "doing");
+        }
+    };
+
+    const updateTaskChips = (phase) => {
+        const tasks = phase.querySelectorAll("[data-task]");
+        tasks.forEach((task) => {
+            const input = task.querySelector("input[type='checkbox']");
+            const chip = task.querySelector("[data-task-status]");
+            if (!input || !chip) {
+                return;
+            }
+            setChipState(chip, input.checked ? "done" : "todo");
+        });
+    };
+
+    const updateCelebration = () => {
+        if (!progressWrap || !celebrate) {
+            return;
+        }
+        const allChecks = Array.from(document.querySelectorAll("input[type='checkbox']"));
+        const allDone = allChecks.length > 0 && allChecks.every((input) => input.checked);
+        celebrate.classList.toggle("show", allDone);
+        progressWrap.classList.toggle("complete", allDone);
+    };
+
+    const updateAll = () => {
+        phases.forEach((phase) => {
+            updateTaskChips(phase);
+            updatePhaseStatus(phase);
+        });
+        updateCelebration();
+    };
+
+    document.addEventListener("change", (event) => {
+        const checkbox = event.target.closest("input[type='checkbox']");
+        if (!checkbox) {
+            return;
+        }
+        const phase = checkbox.closest("[data-phase]");
+        if (phase) {
+            updateTaskChips(phase);
+            updatePhaseStatus(phase);
+        }
+        updateCelebration();
+    });
+
+    document.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-action]");
+        if (!button) {
+            return;
+        }
+        const action = button.getAttribute("data-action");
+        if (action === "expand-all") {
+            phases.forEach((phase) => phase.classList.remove("collapsed"));
+            return;
+        }
+        if (action === "collapse-all") {
+            phases.forEach((phase) => phase.classList.add("collapsed"));
+            return;
+        }
+        const phase = button.closest("[data-phase]");
+        if (!phase) {
+            return;
+        }
+        if (action === "toggle") {
+            phase.classList.toggle("collapsed");
+            return;
+        }
+        if (action === "mark-all") {
+            const checks = phase.querySelectorAll("input[type='checkbox']");
+            checks.forEach((input) => {
+                input.checked = true;
+            });
+            updateTaskChips(phase);
+            updatePhaseStatus(phase);
+            updateCelebration();
+        }
+    });
+
+    updateAll();
+</script>
 {% endblock %}

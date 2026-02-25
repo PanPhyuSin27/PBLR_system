@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html data-theme="light">
 <head>
     <title>{% block title %}Auth{% endblock %}</title>
 
@@ -20,15 +20,66 @@
             --paper: #ffffff;
             --card: #ffffff;
             --line: #e6e6e6;
+            --bg: #f7f7f4;
+            --glow-a: #e9f5f2;
+            --glow-b: #f6efe5;
+        }
+        [data-theme="dark"] {
+            --ink: #f4f6f8;
+            --muted: #b7bdc5;
+            --accent: #5eead4;
+            --paper: #0f1215;
+            --card: #14181c;
+            --line: #2a2f36;
+            --bg: #0c0f12;
+            --glow-a: rgba(15, 118, 110, 0.2);
+            --glow-b: rgba(255, 255, 255, 0.08);
         }
         body {
             font-family: "Work Sans", sans-serif;
-            background: radial-gradient(900px 520px at 10% -10%, #e9f5f2 0, transparent 60%),
-                radial-gradient(680px 380px at 90% 10%, #f6efe5 0, transparent 65%),
-                #f7f7f4;
+            background: radial-gradient(900px 520px at 10% -10%, var(--glow-a) 0, transparent 60%),
+                radial-gradient(680px 380px at 90% 10%, var(--glow-b) 0, transparent 65%),
+                var(--bg);
             color: var(--ink);
             margin: 0;
             min-height: 100vh;
+        }
+        .auth-topbar {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px 24px 0;
+        }
+        .theme-toggle {
+            border: 1px solid var(--line);
+            background: var(--paper);
+            color: var(--ink);
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .theme-toggle svg {
+            width: 16px;
+            height: 16px;
+            display: block;
+        }
+        .theme-toggle .icon-sun {
+            display: none;
+        }
+        [data-theme="dark"] .theme-toggle .icon-sun {
+            display: block;
+        }
+        [data-theme="dark"] .theme-toggle .icon-moon {
+            display: none;
+        }
+        .theme-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.12);
         }
         .auth-page {
             min-height: 100vh;
@@ -186,7 +237,46 @@
 </head>
 <body>
     <div class="auth-page">
+        <div class="auth-topbar">
+            <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                </svg>
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                </svg>
+            </button>
+        </div>
         {% block content %}{% endblock %}
     </div>
+    <script>
+        const root = document.documentElement;
+        const toggle = document.querySelector("[data-theme-toggle]");
+
+        const storedTheme = localStorage.getItem("theme");
+        if (storedTheme) {
+            root.setAttribute("data-theme", storedTheme);
+        }
+
+        const setToggleLabel = () => {
+            if (!toggle) {
+                return;
+            }
+            const isDark = root.getAttribute("data-theme") === "dark";
+            toggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+        };
+
+        setToggleLabel();
+
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                root.setAttribute("data-theme", nextTheme);
+                localStorage.setItem("theme", nextTheme);
+                setToggleLabel();
+            });
+        }
+    </script>
 </body>
 </html>

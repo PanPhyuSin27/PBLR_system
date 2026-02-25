@@ -68,6 +68,9 @@
             border-bottom: 1px solid var(--stroke);
             backdrop-filter: blur(12px);
             margin-bottom: 28px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
         }
         .nav-right {
             display: flex;
@@ -128,13 +131,71 @@
             align-items: center;
             margin-top: 18px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero::before,
+        .hero::after {
+            content: "";
+            position: absolute;
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            filter: blur(0px);
+            opacity: 0.35;
+            z-index: 0;
+        }
+        .hero::before {
+            left: -40px;
+            top: -30px;
+            background: radial-gradient(circle, rgba(255, 111, 61, 0.45), transparent 65%);
+            animation: drift 12s ease-in-out infinite;
+        }
+        .hero::after {
+            right: -30px;
+            bottom: -40px;
+            background: radial-gradient(circle, rgba(93, 173, 255, 0.45), transparent 70%);
+            animation: drift 14s ease-in-out infinite reverse;
+        }
+        .hero-text,
+        .hero-actions {
+            position: relative;
+            z-index: 1;
         }
         .hero-text h1 {
             font-family: "Space Grotesk", sans-serif;
             font-size: 46px;
             margin: 8px 0 12px;
             line-height: 1.06;
+            animation: glow-pop 0.7s ease both;
         }
+        .typewriter {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .typewriter::after {
+            content: "";
+            width: 10px;
+            height: 1.1em;
+            background: var(--accent);
+            display: inline-block;
+            animation: blink 1s steps(2, start) infinite;
+        }
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+        .intro-line {
+            opacity: 0;
+            transform: translateY(18px);
+        }
+        .intro-animate .intro-line {
+            animation: intro-rise 0.9s ease both;
+        }
+        .intro-animate .intro-line.delay-1 { animation-delay: 0.1s; }
+        .intro-animate .intro-line.delay-2 { animation-delay: 0.25s; }
+        .intro-animate .intro-line.delay-3 { animation-delay: 0.4s; }
         .hero-text p {
             color: var(--muted);
             font-size: 16px;
@@ -190,10 +251,18 @@
             padding: 20px;
             box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
         }
-        .hero-card h3 {
+                animation: float-x 7s ease-in-out infinite;
+            }
             margin: 0 0 8px;
             font-family: "Space Grotesk", sans-serif;
         }
+            }
+            .card:nth-child(2) {
+                animation-delay: 1.2s;
+            }
+            .card:nth-child(3) {
+                animation-delay: 2.4s;
+            }
         .hero-card ul {
             margin: 0;
             padding-left: 18px;
@@ -206,15 +275,142 @@
             gap: 14px;
             margin-top: 24px;
         }
+        .roadmap {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 20px;
+        }
+        .roadmap-card {
+            background: var(--surface);
+            border: 1px solid var(--stroke);
+            border-radius: 16px;
+            padding: 18px;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            position: relative;
+            overflow: hidden;
+            animation: rise 0.6s ease both;
+        }
+        .roadmap-card::after {
+            content: "";
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 111, 61, 0.18), transparent 70%);
+        }
+        .roadmap-card h4 {
+            margin: 6px 0 6px;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .mission-card {
+            margin-top: 16px;
+            padding: 26px 24px;
+            border-radius: 18px;
+            border: 1px solid var(--stroke);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 243, 236, 0.85));
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12);
+            animation: mission-pop 0.8s ease both;
+        }
+        [data-theme="dark"] .mission-card {
+            background: linear-gradient(135deg, rgba(20, 24, 28, 0.9), rgba(28, 32, 36, 0.85));
+        }
+        .mission-card::before {
+            content: "";
+            position: absolute;
+            inset: -60px;
+            background: radial-gradient(circle, rgba(255, 111, 61, 0.25), transparent 60%);
+            animation: mission-glow 6s ease-in-out infinite;
+        }
+        .mission-card::after {
+            content: "";
+            position: absolute;
+            right: -80px;
+            bottom: -80px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(93, 173, 255, 0.25), transparent 65%);
+        }
+        .mission-content {
+            position: relative;
+            z-index: 1;
+        }
+        .mission-title {
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 22px;
+            margin: 0 0 8px;
+        }
+        .mission-text {
+            margin: 0;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+        .roadmap-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: rgba(93, 173, 255, 0.16);
+            color: #1d4ed8;
+            font-weight: 700;
+        }
+        .roadmap-list {
+            margin: 10px 0 0 18px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
         .meta-box {
             background: rgba(255, 255, 255, 0.75);
             border: 1px solid var(--stroke);
             padding: 12px 14px;
             border-radius: 14px;
             text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
         }
         [data-theme="dark"] .meta-box {
             background: rgba(20, 24, 28, 0.85);
+        }
+        .meta-box:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.12);
+        }
+        .meta-box strong {
+            font-size: 18px;
+            display: block;
+            font-family: "Space Grotesk", sans-serif;
+        }
+        .meta-box span {
+            display: block;
+            color: var(--muted);
+        }
+        .meta-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: rgba(255, 111, 61, 0.15);
+            color: var(--accent-dark);
+            font-weight: 700;
+        }
+        .meta-box.swap {
+            animation: swap-pop 0.45s ease;
+        }
+        .meta-box.swap {
+            animation: swap-pop 0.45s ease;
         }
         .meta-box strong {
             font-size: 18px;
@@ -442,9 +638,43 @@
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(18px, -10px) scale(1.05); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+        @keyframes glow-pop {
+            from { opacity: 0; transform: translateY(10px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes mission-pop {
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes mission-glow {
+            0% { transform: translateY(0) scale(1); opacity: 0.7; }
+            50% { transform: translateY(-10px) scale(1.05); opacity: 1; }
+            100% { transform: translateY(0) scale(1); opacity: 0.7; }
+        }
+        @keyframes intro-rise {
+            0% { opacity: 0; transform: translateY(18px); filter: blur(2px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes swap-pop {
+            from { opacity: 0.6; transform: translateY(6px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes float-x {
+            0% { transform: translateX(-6px); }
+            50% { transform: translateX(6px); }
+            100% { transform: translateX(-6px); }
+        }
         @media (max-width: 960px) {
             .hero-meta {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            .roadmap {
+                grid-template-columns: 1fr;
             }
             .grid {
                 grid-template-columns: 1fr;
@@ -517,12 +747,12 @@
 
         <header class="hero">
             <div class="hero-text fade-up">
-                <div class="eyebrow">Personalized project learning</div>
-                <h1>Build the right projects for the career you want.</h1>
-                <p>Stop guessing what to build next. We match you with projects based on your role, skill level, and interests so every hour moves you forward.</p>
-                <div class="hero-actions">
+                <div class="eyebrow intro-line delay-1">Personalized project learning</div>
+                <h1 class="intro-line delay-2"><span class="typewriter" data-typewriter>Build the right projects for the career you want.</span></h1>
+                <p class="intro-line delay-3">Stop guessing what to build next. We match you with projects based on your role, skill level, and interests so every hour moves you forward.</p>
+                <div class="hero-actions intro-line delay-3">
                     <a class="btn-primary" href="{% url 'signup' %}">Get started</a>
-                    <a class="btn-ghost" href="#library">Explore library</a>
+                    <a class="btn-ghost" href="#project-library">Explore library</a>
                 </div>
             </div>
         </header>
@@ -530,23 +760,71 @@
         <section class="section-block fade-up">
             <h2>Learning Highlights</h2>
             <p class="section-sub">A quick snapshot of the guided structure you will follow.</p>
-            <div class="hero-meta">
-                <div class="meta-box">
-                    <strong>120+</strong>
-                    <span>Guided projects</span>
+            <div class="hero-meta" data-highlights>
+                <div class="meta-box" data-highlight>
+                    <div class="meta-badge">Highlight</div>
+                    <strong data-highlight-value>120+</strong>
+                    <span data-highlight-label>Guided projects</span>
                 </div>
-                <div class="meta-box">
-                    <strong>6</strong>
-                    <span>Learning tracks</span>
+                <div class="meta-box" data-highlight>
+                    <div class="meta-badge">Highlight</div>
+                    <strong data-highlight-value>6</strong>
+                    <span data-highlight-label>Learning tracks</span>
                 </div>
-                <div class="meta-box">
-                    <strong>Stepwise</strong>
-                    <span>Progress tracking</span>
+                <div class="meta-box" data-highlight>
+                    <div class="meta-badge">Highlight</div>
+                    <strong data-highlight-value>Stepwise</strong>
+                    <span data-highlight-label>Progress tracking</span>
                 </div>
             </div>
         </section>
 
         <section class="section-block fade-up delay-1">
+            <h2>Sample Roadmap</h2>
+            <p class="section-sub">See a sample profile journey from beginner to job-ready projects.</p>
+            <div class="roadmap">
+                <div class="roadmap-card">
+                    <span class="roadmap-badge">Week 1-2</span>
+                    <h4>Foundation Sprint</h4>
+                    <ul class="roadmap-list">
+                        <li>Pick a role: Data Analyst</li>
+                        <li>Set skills: SQL, dashboards</li>
+                        <li>Ship mini project: KPI tracker</li>
+                    </ul>
+                </div>
+                <div class="roadmap-card">
+                    <span class="roadmap-badge">Week 3-4</span>
+                    <h4>Applied Projects</h4>
+                    <ul class="roadmap-list">
+                        <li>Build a sales insights dashboard</li>
+                        <li>Write a short case study</li>
+                        <li>Track progress milestones</li>
+                    </ul>
+                </div>
+                <div class="roadmap-card">
+                    <span class="roadmap-badge">Week 5-6</span>
+                    <h4>Portfolio Ready</h4>
+                    <ul class="roadmap-list">
+                        <li>Ship a capstone project</li>
+                        <li>Polish GitHub + README</li>
+                        <li>Prepare interview stories</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="section-block fade-up delay-2">
+            <h2>Our Mission</h2>
+            <p class="section-sub">Why we built RecoMagic.</p>
+            <div class="mission-card">
+                <div class="mission-content">
+                    <h3 class="mission-title">Guided learning that builds real momentum</h3>
+                    <p class="mission-text">We help learners turn curiosity into career-ready skills by guiding them through real-world projects, focused sprints, and measurable progress. Every step is designed to build confidence, portfolio proof, and momentum.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="project-library" class="section-block fade-up delay-1">
             <h2>Project Showcase</h2>
             <p class="section-sub">Browse sample projects grouped by category to see what your learning path could include.</p>
 
@@ -564,7 +842,7 @@
                             <span class="tag">Vector Search</span>
                             <span class="tag">Python</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'resume-matcher' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Customer Support Copilot</h4>
@@ -574,7 +852,7 @@
                             <span class="tag">RAG</span>
                             <span class="tag">Workflow</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'customer-support-copilot' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Visual Quality Inspector</h4>
@@ -584,7 +862,7 @@
                             <span class="tag">CNN</span>
                             <span class="tag">MLOps</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'visual-quality-inspector' %}">Start project</a>
                     </div>
                 </div>
             </div>
@@ -603,7 +881,7 @@
                             <span class="tag">BI</span>
                             <span class="tag">Metrics</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'sales-insight-dashboard' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Customer Churn Model</h4>
@@ -613,7 +891,7 @@
                             <span class="tag">Feature Eng</span>
                             <span class="tag">Python</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'customer-churn-model' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Price Elasticity Study</h4>
@@ -623,7 +901,7 @@
                             <span class="tag">Econometrics</span>
                             <span class="tag">Forecasting</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'price-elasticity-study' %}">Start project</a>
                     </div>
                 </div>
             </div>
@@ -642,7 +920,7 @@
                             <span class="tag">REST</span>
                             <span class="tag">JWT</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'job-board-api' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Portfolio Builder</h4>
@@ -652,7 +930,7 @@
                             <span class="tag">UI</span>
                             <span class="tag">Responsive</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'portfolio-builder' %}">Start project</a>
                     </div>
                     <div class="card">
                         <h4>Freelance CRM</h4>
@@ -662,7 +940,7 @@
                             <span class="tag">Email</span>
                             <span class="tag">SaaS</span>
                         </div>
-                        <a class="card-link" href="{% url 'signup' %}">View project</a>
+                        <a class="card-link" href="{% url 'start_showcase' 'freelance-crm' %}">Start project</a>
                     </div>
                 </div>
             </div>
@@ -670,19 +948,97 @@
 
         <section id="resources" class="section-block fade-up delay-2">
             <h2>Resources</h2>
-            <p class="section-sub">Short guides, templates, and checklists to keep your projects clean, scoped, and portfolio ready.</p>
+            <p class="section-sub">Role-based starter kits, skill tracks, and quick wins for IT youth.</p>
             <div class="grid">
                 <div class="card">
-                    <h4>Project briefs</h4>
-                    <p>Clear problem statements and success criteria.</p>
+                    <h4>Frontend Developer</h4>
+                    <p>HTML/CSS/JS basics, responsive UI, and React fundamentals.</p>
+                    <div class="tags">
+                        <span class="tag">MDN HTML</span>
+                        <span class="tag">CSS</span>
+                        <span class="tag">React</span>
+                    </div>
+                    <a class="card-link" href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noreferrer">Start learning</a>
                 </div>
                 <div class="card">
-                    <h4>Skill maps</h4>
-                    <p>See which competencies each project develops.</p>
+                    <h4>Backend Developer</h4>
+                    <p>APIs, databases, auth, and server-side patterns.</p>
+                    <div class="tags">
+                        <span class="tag">Django</span>
+                        <span class="tag">REST</span>
+                        <span class="tag">SQL</span>
+                    </div>
+                    <a class="card-link" href="https://docs.djangoproject.com/" target="_blank" rel="noreferrer">Explore Django</a>
                 </div>
                 <div class="card">
-                    <h4>Delivery checklists</h4>
-                    <p>Ship with confidence using QA and deployment steps.</p>
+                    <h4>Data Analyst</h4>
+                    <p>Spreadsheets, SQL, and dashboards for insights.</p>
+                    <div class="tags">
+                        <span class="tag">SQL</span>
+                        <span class="tag">BI</span>
+                        <span class="tag">Storytelling</span>
+                    </div>
+                    <a class="card-link" href="https://mode.com/sql-tutorial/" target="_blank" rel="noreferrer">SQL starter</a>
+                </div>
+                <div class="card">
+                    <h4>Data Scientist</h4>
+                    <p>Python, modeling, and experiment workflow.</p>
+                    <div class="tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">Pandas</span>
+                        <span class="tag">ML</span>
+                    </div>
+                    <a class="card-link" href="https://scikit-learn.org/stable/tutorial/basic/tutorial.html" target="_blank" rel="noreferrer">ML basics</a>
+                </div>
+                <div class="card">
+                    <h4>Mobile Developer</h4>
+                    <p>Build cross-platform apps with Flutter or React Native.</p>
+                    <div class="tags">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Mobile</span>
+                        <span class="tag">UX</span>
+                    </div>
+                    <a class="card-link" href="https://docs.flutter.dev/get-started/install" target="_blank" rel="noreferrer">Flutter setup</a>
+                </div>
+                <div class="card">
+                    <h4>Cybersecurity</h4>
+                    <p>Security fundamentals, tooling, and safe labs.</p>
+                    <div class="tags">
+                        <span class="tag">SOC</span>
+                        <span class="tag">Blue Team</span>
+                        <span class="tag">Labs</span>
+                    </div>
+                    <a class="card-link" href="https://www.kali.org/docs/" target="_blank" rel="noreferrer">Security labs</a>
+                </div>
+                <div class="card">
+                    <h4>Cloud / DevOps</h4>
+                    <p>Deployments, CI/CD, and monitoring basics.</p>
+                    <div class="tags">
+                        <span class="tag">AWS</span>
+                        <span class="tag">CI/CD</span>
+                        <span class="tag">Docker</span>
+                    </div>
+                    <a class="card-link" href="https://aws.amazon.com/getting-started/" target="_blank" rel="noreferrer">Cloud start</a>
+                </div>
+                <div class="card">
+                    <h4>UI/UX Designer</h4>
+                    <p>Design thinking, wireframes, and prototypes.</p>
+                    <div class="tags">
+                        <span class="tag">Figma</span>
+                        <span class="tag">UX</span>
+                        <span class="tag">Research</span>
+                    </div>
+                    <a class="card-link" href="https://www.figma.com/resources/learn-design/" target="_blank" rel="noreferrer">Design basics</a>
+                </div>
+                <div class="card">
+                    <h4>QA / Testing</h4>
+                    <p>Manual testing, automation, and bug reports.</p>
+                    <div class="tags">
+                        <span class="tag">Testing</span>
+                        <span class="tag">Automation</span>
+                        <span class="tag">Quality</span>
+                    </div>
+                    <a class="card-link" href="https://playwright.dev/docs/intro" target="_blank" rel="noreferrer">Test automation</a>
                 </div>
             </div>
         </section>
@@ -724,6 +1080,19 @@
         const root = document.documentElement;
         const toggle = document.querySelector("[data-theme-toggle]");
         const scrollTopButton = document.querySelector("[data-scroll-top]");
+        const highlightCards = Array.from(document.querySelectorAll("[data-highlight]"));
+
+        const highlightOptions = [
+            { value: "120+", label: "Guided projects" },
+            { value: "6", label: "Learning tracks" },
+            { value: "Stepwise", label: "Progress tracking" },
+            { value: "3", label: "AI learning modes" },
+            { value: "45 min", label: "Average sprint" },
+            { value: "Weekly", label: "Goal check-ins" },
+            { value: "Portfolio", label: "Ready outcomes" },
+            { value: "Live", label: "Skill feedback" },
+            { value: "Milestones", label: "Phase unlocks" },
+        ];
 
         const storedTheme = localStorage.getItem("theme");
         if (storedTheme) {
@@ -744,6 +1113,34 @@
             setToggleLabel();
         });
 
+        const shuffle = (items) => {
+            const array = items.slice();
+            for (let i = array.length - 1; i > 0; i -= 1) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        };
+
+        const applyHighlights = () => {
+            if (!highlightCards.length) {
+                return;
+            }
+            const picks = shuffle(highlightOptions).slice(0, highlightCards.length);
+            highlightCards.forEach((card, index) => {
+                const value = card.querySelector("[data-highlight-value]");
+                const label = card.querySelector("[data-highlight-label]");
+                if (!value || !label) {
+                    return;
+                }
+                value.textContent = picks[index].value;
+                label.textContent = picks[index].label;
+                card.classList.remove("swap");
+                void card.offsetWidth;
+                card.classList.add("swap");
+            });
+        };
+
         const onScroll = () => {
             if (window.scrollY > 300) {
                 scrollTopButton.classList.add("show");
@@ -758,6 +1155,53 @@
 
         window.addEventListener("scroll", onScroll);
         onScroll();
+        applyHighlights();
+        setInterval(applyHighlights, 4500);
+        const typeTarget = document.querySelector("[data-typewriter]");
+        const typePhrases = [
+            "Build the right projects for the career you want.",
+            "Turn learning into real portfolio wins.",
+            "Follow guided sprints that level you up.",
+            "Ship projects that recruiters recognize.",
+        ];
+        let phraseIndex = 0;
+        let charIndex = 0;
+        let deleting = false;
+
+        const typeTick = () => {
+            if (!typeTarget) {
+                return;
+            }
+            const current = typePhrases[phraseIndex];
+            if (!deleting) {
+                charIndex += 1;
+                typeTarget.textContent = current.slice(0, charIndex);
+                if (charIndex >= current.length) {
+                    deleting = true;
+                    setTimeout(typeTick, 5000);
+                    return;
+                }
+                setTimeout(typeTick, 45);
+            } else {
+                charIndex -= 1;
+                typeTarget.textContent = current.slice(0, Math.max(charIndex, 0));
+                if (charIndex <= 0) {
+                    deleting = false;
+                    phraseIndex = (phraseIndex + 1) % typePhrases.length;
+                    setTimeout(typeTick, 200);
+                    return;
+                }
+                setTimeout(typeTick, 20);
+            }
+        };
+
+        window.requestAnimationFrame(() => {
+            document.body.classList.add("intro-animate");
+            if (typeTarget) {
+                typeTarget.textContent = "";
+                typeTick();
+            }
+        });
     </script>
 </body>
 </html>

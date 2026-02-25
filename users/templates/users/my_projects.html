@@ -22,8 +22,8 @@
                         </div>
                     </div>
                     <div class="rec-actions">
-                        <a class="btn btn-primary" href="{% url 'start_recommendation' project.index %}">Resume</a>
-                        <a class="btn" href="{% url 'start_recommendation' project.index %}?regen=1">Regenerate</a>
+                        <a class="btn btn-primary" href="{{ project.start_url }}">Resume</a>
+                        <a class="btn" href="{{ project.regen_url }}">Regenerate</a>
                     </div>
                 </div>
             {% endfor %}

@@ -9,6 +9,13 @@ class UserProfile(models.Model):
         ("intermediate", "Intermediate"),
         ("advanced", "Advanced"),
     ]
+    LEARNING_STYLE_CHOICES = [
+        ("step_by_step", "Step-by-step"),
+        ("hands_on", "Hands-on"),
+        ("visual_examples", "Visual + examples"),
+        ("short_lessons", "Short lessons + practice"),
+        ("guided_checklist", "Guided checklist"),
+    ]
 
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
@@ -18,11 +25,10 @@ class UserProfile(models.Model):
     tech_preference = models.CharField(max_length=100)
     learning_goal = models.CharField(max_length=100)
     interest_tags = models.CharField(max_length=200, help_text="Comma separated tags")
-    learning_style = models.CharField(max_length=100, blank=True, null=True)
+    learning_style = models.CharField(max_length=100, blank=True, null=True, choices=LEARNING_STYLE_CHOICES)
 
     def __str__(self):
         return f"{self.user.username} Profile"
-
 
 class ProjectTemplate(models.Model):
     category = models.CharField(max_length=100, unique=True)
