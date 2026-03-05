@@ -2,49 +2,122 @@
 
 {% block title %}Profile{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .profile-view-stack {
+        display: grid;
+        gap: 16px;
+    }
+    .profile-view-card {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 18px;
+        background: var(--surface);
+    }
+    .profile-view-user {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+    .profile-view-user-main {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .profile-view-avatar,
+    .profile-view-fallback {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        border: 1px solid var(--stroke);
+    }
+    .profile-view-avatar {
+        object-fit: cover;
+    }
+    .profile-view-fallback {
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+    }
+    .profile-view-user span {
+        display: block;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        margin-bottom: 4px;
+    }
+    .profile-view-user strong {
+        display: block;
+        font-size: 18px;
+        margin-bottom: 2px;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <h1 class="page-title">Your Profile</h1>
 <p class="page-sub">Keep your learning preferences up to date for better recommendations.</p>
-<div class="form-actions">
-    <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
-    <a class="btn" href="{% url 'profile_edit' %}">Edit Profile</a>
-</div>
 
-{% if profile %}
-    <div class="profile-grid">
-        <div class="info-card">
-            <span>Field</span>
-            <strong>{{ profile.field }}</strong>
+<div class="profile-view-stack">
+    <section class="profile-view-card">
+        <div class="profile-view-user">
+            <div class="profile-view-user-main">
+                {% if profile and profile.profile_picture %}
+                    <img class="profile-view-avatar" src="{{ profile.profile_picture.url }}" alt="Profile picture" />
+                {% else %}
+                    <div class="profile-view-fallback">{{ user.username|slice:':1'|upper }}</div>
+                {% endif %}
+                <div>
+                    <span>Account</span>
+                    <strong>{{ user.username }}</strong>
+                    <div class="helper-text">{{ user.email }}</div>
+                </div>
+            </div>
+            <a class="btn" href="{% url 'profile_edit' %}">Edit Profile</a>
         </div>
-        <div class="info-card">
-            <span>Target Role</span>
-            <strong>{{ profile.target_role }}</strong>
-        </div>
-        <div class="info-card">
-            <span>Skill Level</span>
-            <strong>{{ profile.skill_level }}</strong>
-        </div>
-        <div class="info-card">
-            <span>Tech Preference</span>
-            <strong>{{ profile.tech_preference }}</strong>
-        </div>
-        <div class="info-card">
-            <span>Learning Goal</span>
-            <strong>{{ profile.learning_goal }}</strong>
-        </div>
-        <div class="info-card">
-            <span>Interest Tags</span>
-            <strong>{{ profile.interest_tags }}</strong>
-        </div>
-        <div class="info-card">
-            <span>Learning Style</span>
-            <strong>{{ profile.learning_style|default:"Not set" }}</strong>
-        </div>
-    </div>
-{% else %}
-    <div class="empty-state">
-        <p>No profile yet. Add your details to unlock tailored project recommendations.</p>
-        <a class="btn btn-primary" href="{% url 'profile_edit' %}">Create Profile</a>
-    </div>
-{% endif %}
+    </section>
+
+    <section class="profile-view-card">
+        {% if premium_request %}
+            <p class="helper-text" style="margin: 0 0 14px;">Premium request status: {{ premium_request.status|title }}</p>
+        {% endif %}
+
+        {% if profile %}
+            <div class="profile-grid">
+                <div class="info-card">
+                    <span>Field</span>
+                    <strong>{{ profile.field }}</strong>
+                </div>
+                <div class="info-card">
+                    <span>Target Role</span>
+                    <strong>{{ profile.target_role }}</strong>
+                </div>
+                <div class="info-card">
+                    <span>Skill Level</span>
+                    <strong>{{ profile.skill_level }}</strong>
+                </div>
+                <div class="info-card">
+                    <span>Tech Preference</span>
+                    <strong>{{ profile.tech_preference }}</strong>
+                </div>
+                <div class="info-card">
+                    <span>Learning Goal</span>
+                    <strong>{{ profile.learning_goal }}</strong>
+                </div>
+                <div class="info-card">
+                    <span>Interest Tags</span>
+                    <strong>{{ profile.interest_tags }}</strong>
+                </div>
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>No profile yet. Add your details to unlock tailored project recommendations.</p>
+                <a class="btn btn-primary" href="{% url 'profile_edit' %}">Create Profile</a>
+            </div>
+        {% endif %}
+    </section>
+</div>
 {% endblock %}

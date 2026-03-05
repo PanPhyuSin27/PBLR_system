@@ -2,25 +2,93 @@
 
 {% block title %}Edit Profile{% endblock %}
 
+{% block extra_styles %}
+<style>
+    .profile-edit-stack {
+        display: grid;
+        gap: 16px;
+    }
+    .profile-edit-card {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 18px;
+        background: var(--surface);
+    }
+    .profile-edit-card h3 {
+        margin: 0 0 12px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 24px;
+    }
+    .profile-edit-avatar {
+        margin: 0 0 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .profile-edit-avatar img {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid var(--stroke);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <h1 class="page-title">Edit Profile</h1>
 <p class="page-sub">Update your profile to get better project recommendations.</p>
 
-<form method="POST">
+<form method="POST" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="form-grid">
-        {% for field in form %}
-            <div class="field-group">
-                {{ field.label_tag }}
-                {{ field }}
-                {% if field.errors %}
-                    <div class="helper-text">{{ field.errors|striptags }}</div>
-                {% endif %}
+    <div class="profile-edit-stack">
+        <section class="profile-edit-card">
+            <h3>User Information</h3>
+            <div class="form-grid">
+                {% for field in account_form %}
+                    <div class="field-group">
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="helper-text">{{ field.errors|striptags }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <div class="field-group">
+                    <label for="id_profile_picture">Profile picture</label>
+                    {% if profile and profile.profile_picture %}
+                        <div class="profile-edit-avatar" style="margin: 4px 0 8px;">
+                            <img src="{{ profile.profile_picture.url }}" alt="Profile picture" />
+                            <span class="helper-text">Current profile picture</span>
+                        </div>
+                    {% endif %}
+                    <input id="id_profile_picture" name="profile_picture" type="file" accept="image/*" />
+                    {% if profile_form.profile_picture.errors %}
+                        <div class="helper-text">{{ profile_form.profile_picture.errors|striptags }}</div>
+                    {% endif %}
+                </div>
             </div>
-        {% endfor %}
+        </section>
+
+        <section class="profile-edit-card">
+            <h3>Learning Profile</h3>
+            <div class="form-grid">
+                {% for field in profile_form %}
+                    {% if field.name != "profile_picture" %}
+                        <div class="field-group">
+                            {{ field.label_tag }}
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="helper-text">{{ field.errors|striptags }}</div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </section>
     </div>
 
-    <div class="form-actions">
+    <div class="form-actions" style="margin-top: 22px;">
         <button class="btn btn-primary" type="submit">Save</button>
         <a class="btn" href="{% url 'recommendations' %}">View Recommendations</a>
         <a class="btn" href="{% url 'profile_view' %}">Cancel</a>

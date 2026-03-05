@@ -1,37 +1,61 @@
-import json
-import os
-import urllib.error
-import urllib.request
+from datetime import date, timedelta
+from django.utils import timezone
+from django.db.utils import OperationalError
 
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from .forms import SignUpForm, UserProfileForm
-from .models import UserProfile
+from .forms import SignUpForm, UserAccountForm, UserProfileForm
+from .models import Plan, PremiumRequest, Project, Subscription, UserProfile
+from .recommendation_service import recommend_projects_for_profile
 
 
 def home_view(request):
-    return render(request, "users/home.html")
+    pro_monthly_id = Plan.objects.filter(name__iexact="Pro Monthly").values_list("id", flat=True).first()
+    pro_yearly_id = Plan.objects.filter(name__iexact="Pro Yearly").values_list("id", flat=True).first()
+    active_subscription = None
+    premium_request = None
+    pending_plan_id = None
+    active_plan_id = None
+    approved_plan_id = None
+    premium_request_error = ""
+    premium_request_success = ""
+    if request.user.is_authenticated:
+        active_subscription = _get_active_subscription(request.user)
+        premium_request = _get_latest_premium_request(request.user)
+        pending_request = _get_pending_premium_request(request.user)
+        if pending_request:
+            pending_plan_id = pending_request.plan_id
+        if active_subscription and active_subscription.plan and active_subscription.plan.price > 0:
+            active_plan_id = active_subscription.plan_id
+        approved_request = _get_latest_approved_premium_request(request.user)
+        if approved_request:
+            approved_plan_id = approved_request.plan_id
+        premium_request_error = request.session.pop("premium_request_error", "")
+        premium_request_success = request.session.pop("premium_request_success", "")
+    return render(
+        request,
+        "users/home.html",
+        {
+            "active_subscription": active_subscription,
+            "active_plan_id": active_plan_id,
+            "approved_plan_id": approved_plan_id,
+            "premium_request": premium_request,
+            "pending_plan_id": pending_plan_id,
+            "premium_request_error": premium_request_error,
+            "premium_request_success": premium_request_success,
+            "pro_monthly_id": pro_monthly_id,
+            "pro_yearly_id": pro_yearly_id,
+        },
+    )
 
 
 def projects_view(request): 
     return render(request, "users/projects.html")
 
                      
-def _build_profile_payload(profile):
-    return {
-        "field": profile.field,
-        "target_role": profile.target_role,
-        "skill_level": profile.skill_level,
-        "tech_preference": profile.tech_preference,
-        "learning_goal": profile.learning_goal,
-        "interest_tags": profile.interest_tags,
-        "learning_style": profile.learning_style,
-    }
-
-
 def _normalize_learning_style(value):
     if not value:
         return ""
@@ -241,218 +265,198 @@ def _get_showcase_project(slug):
     }
 
 
-def _fetch_ai_recommendations(profile, request):
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        return []
+def _build_default_phases(project):
+    title = str(project.get("title") or "Project").strip()
+    category = str(project.get("category") or "General").strip()
+    stack = [tag.strip() for tag in project.get("stack", []) if str(tag).strip()]
+    tech_hint = ", ".join(stack[:3]) if stack else "your selected stack"
 
-    prompt = (
-        "You are a project recommendation engine. "
-        "Return a JSON array of 6 project suggestions based on this user profile. "
-        "Each item must include: title, category, difficulty (beginner/intermediate/advanced), "
-        "summary (1 sentence), and stack (array of 3-5 short tags). "
-        "Return only valid JSON, no extra text.\n\n"
-        f"Profile: {json.dumps(_build_profile_payload(profile))}"
-    )
+    return [
+        {
+            "title": "Planning & Setup",
+            "description": f"Define scope, outcomes, and setup for {title} ({category}).",
+            "resources": [],
+            "tasks": [
+                {"id": 1, "description": f"Clarify requirements for {title}", "steps": [], "learn": "", "key_terms": []},
+                {"id": 2, "description": f"Prepare development environment with {tech_hint}", "steps": [], "learn": "", "key_terms": []},
+                {"id": 3, "description": "Create initial project structure and milestones", "steps": [], "learn": "", "key_terms": []},
+            ],
+        },
+        {
+            "title": "Core Build",
+            "description": "Implement core features and verify expected behavior.",
+            "resources": [],
+            "tasks": [
+                {"id": 4, "description": "Implement primary workflow", "steps": [], "learn": "", "key_terms": []},
+                {"id": 5, "description": "Add validation and error handling", "steps": [], "learn": "", "key_terms": []},
+                {"id": 6, "description": "Run functional tests for key scenarios", "steps": [], "learn": "", "key_terms": []},
+            ],
+        },
+        {
+            "title": "Polish & Delivery",
+            "description": "Refine quality and prepare portfolio-ready deliverables.",
+            "resources": [],
+            "tasks": [
+                {"id": 7, "description": "Improve UX/readability and clean code", "steps": [], "learn": "", "key_terms": []},
+                {"id": 8, "description": "Document setup, usage, and architecture", "steps": [], "learn": "", "key_terms": []},
+                {"id": 9, "description": "Prepare final demo or deployment checklist", "steps": [], "learn": "", "key_terms": []},
+            ],
+        },
+    ]
 
-    payload = {
-        "model": "meta-llama/llama-3.3-70b-instruct:free",
-        
-        "messages": [
-            {"role": "system", "content": "You only respond with JSON."},
-            {"role": "user", "content": prompt},
-        ],
-        "temperature": 0.6,
-    }
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": request.build_absolute_uri("/"),
-        "X-Title": "RecoMagic",
-    }
+def _build_local_phases(profile, project, learning_style=None):
+    phases = _build_default_phases(project)
+    return _ensure_guidance(phases, learning_style)
 
-    req = urllib.request.Request(
-        "https://openrouter.ai/api/v1/chat/completions",
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST",
-    )
 
-    try:
-        with urllib.request.urlopen(req, timeout=20) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except (urllib.error.URLError, urllib.error.HTTPError, json.JSONDecodeError):
-        return []
+def _split_lines(value):
+    lines = []
+    for raw_line in str(value or "").splitlines():
+        line = raw_line.strip().lstrip("-•").strip()
+        if line:
+            lines.append(line)
+    return lines
 
-    try:
-        content = data["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
-    except (KeyError, IndexError, json.JSONDecodeError, TypeError):
-        return []
 
-    if not isinstance(parsed, list):
-        return []
-
-    normalized = []
-    for item in parsed:
-        if not isinstance(item, dict):
+def _parse_resources(value):
+    resources = []
+    for line in _split_lines(value):
+        if "|" in line:
+            title, url = [item.strip() for item in line.split("|", 1)]
+            resources.append({"title": title or url, "url": url})
             continue
-        normalized.append(
-            {
-                "title": item.get("title", "Untitled Project"),
-                "category": item.get("category", "Custom Projects"),
-                "difficulty": item.get("difficulty", "intermediate"),
-                "summary": item.get("summary", ""),
-                "stack": item.get("stack", []),
-            }
-        )
-    return normalized
+        resources.append({"title": line, "url": line if line.startswith("http") else ""})
+    return resources
 
 
-def _fetch_ai_phases(profile, project, request, learning_style=None):
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        request.session["ai_error_detail"] = "Missing OPENROUTER_API_KEY in .env"
-        return []
+def _build_workspace_payload(project_record, fallback_project):
+    if project_record:
+        objectives = _split_lines(project_record.learning_objectives)
+        if not objectives and project_record.learning_goal:
+            objectives = [project_record.learning_goal]
 
-    payload_data = {
-        "project": project,
-        "profile": _build_profile_payload(profile),
-    }
+        tasks = _split_lines(project_record.task_checklist)
+        if not tasks:
+            tasks = [
+                "Review project requirements and success criteria",
+                "Set up the development workspace",
+                "Implement the main workflow",
+                "Validate results and document outcomes",
+            ]
 
-    if learning_style:
-        payload_data["learning_style"] = learning_style
+        return {
+            "title": project_record.title,
+            "full_description": project_record.description,
+            "required_tech_stack": [item.strip() for item in str(project_record.tech_preference).split(",") if item.strip()],
+            "learning_objectives": objectives,
+            "resources": _parse_resources(project_record.resources),
+            "task_items": tasks,
+            "detailed_roadmap": _split_lines(project_record.detailed_roadmap),
+            "github_starter_template": project_record.github_starter_template,
+            "premium_hints": _split_lines(project_record.premium_hints),
+        }
 
-    if learning_style:
-        prompt = (
-            "You are a project planner and learning coach. "
-            "Return a JSON array of phases for the project. "
-            "Each phase must include: title, description, resources (array of {title, url}), and tasks. "
-            "Each task must include: description, steps (array of 3-5 short steps), "
-            "learn (1-2 sentence micro-lesson), and key_terms (array of 3-5 terms). "
-            "Return only valid JSON, no extra text.\n\n"
-            f"Context: {json.dumps(payload_data)}"
-        )
-    else:
-        prompt = (
-            "You are a project planner. "
-            "Return a JSON array of phases for the project. "
-            "Each phase must include: title, description, tasks (array of 4-6 short task strings). "
-            "Return only valid JSON, no extra text.\n\n"
-            f"Context: {json.dumps(payload_data)}"
-        )
-
-    payload = {
-        "model": "meta-llama/llama-3.3-70b-instruct:free",
-        "messages": [
-            {"role": "system", "content": "You only respond with JSON."},
-            {"role": "user", "content": prompt},
+    return {
+        "title": fallback_project.get("title", "Project"),
+        "full_description": fallback_project.get("summary", ""),
+        "required_tech_stack": [item.strip() for item in fallback_project.get("stack", []) if str(item).strip()],
+        "learning_objectives": ["Build practical experience through guided tasks"],
+        "resources": [],
+        "task_items": [
+            "Review project scope",
+            "Build the first working version",
+            "Test and improve quality",
         ],
-        "temperature": 0.5,
+        "detailed_roadmap": [],
+        "github_starter_template": "",
+        "premium_hints": [],
     }
 
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": request.build_absolute_uri("/"),
-        "X-Title": "RecoMagic",
-    }
 
-    req = urllib.request.Request(
-        "https://openrouter.ai/api/v1/chat/completions",
-        data=json.dumps(payload).encode("utf-8"),
-        headers=headers,
-        method="POST",
+def _build_phases_from_tasks(project, task_items, learning_style=None):
+    tasks = []
+    for idx, item in enumerate(task_items, start=1):
+        tasks.append({"id": idx, "description": item, "steps": [], "learn": "", "key_terms": []})
+    phases = [
+        {
+            "title": "Task Checklist",
+            "description": f"Core tasks for {project.get('title', 'your project')}.",
+            "resources": [],
+            "tasks": tasks,
+        }
+    ]
+    return _ensure_guidance(phases, learning_style)
+
+
+def _tier_from_plan_name(plan_name):
+    name = str(plan_name or "").strip().lower()
+    if "yearly" in name:
+        return "pro_yearly"
+    if "pro" in name or "monthly" in name:
+        return "pro_monthly"
+    return "explorer"
+
+
+def _get_user_subscription_tier(user):
+    active_subscription = _get_active_subscription(user)
+    if active_subscription and active_subscription.plan and active_subscription.plan.price > 0:
+        return _tier_from_plan_name(active_subscription.plan.name), active_subscription.plan.name
+
+    approved_request = (
+        PremiumRequest.objects.filter(user=user, status="approved", plan__price__gt=0)
+        .select_related("plan")
+        .order_by("-reviewed_at", "-requested_at", "-id")
+        .first()
     )
+    if not approved_request or not approved_request.plan:
+        return "explorer", "Explorer"
 
+    tier = _tier_from_plan_name(approved_request.plan.name)
+    duration_days = 365 if tier == "pro_yearly" else 30
+    approved_at = approved_request.reviewed_at or approved_request.requested_at
+    if not approved_at:
+        return tier, approved_request.plan.name
+
+    expires_at = approved_at.date() + timedelta(days=duration_days)
+    if expires_at >= timezone.now().date():
+        return tier, approved_request.plan.name
+    return "explorer", "Explorer"
+
+
+def _get_active_subscription(user):
+    Subscription.objects.filter(is_active=True, end_date__lt=timezone.now().date()).update(is_active=False)
+    return Subscription.objects.filter(user=user, is_active=True, end_date__gte=timezone.now().date()).select_related("plan").first()
+
+
+def _is_premium(user):
+    tier, _ = _get_user_subscription_tier(user)
+    return tier != "explorer"
+
+
+def _get_latest_premium_request(user):
     try:
-        with urllib.request.urlopen(req, timeout=20) as response:
-            data = json.loads(response.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        try:
-            error_body = exc.read().decode("utf-8")
-        except Exception:
-            error_body = ""
-        request.session["ai_error_detail"] = f"OpenRouter HTTP {exc.code}: {error_body[:200]}"
-        return []
-    except urllib.error.URLError as exc:
-        request.session["ai_error_detail"] = f"OpenRouter connection error: {exc.reason}"
-        return []
-    except json.JSONDecodeError:
-        request.session["ai_error_detail"] = "OpenRouter response was not valid JSON"
-        return []
+        return PremiumRequest.objects.filter(user=user).order_by("-requested_at", "-id").first()
+    except OperationalError:
+        return None
 
+
+def _get_pending_premium_request(user):
     try:
-        content = data["choices"][0]["message"]["content"]
-        parsed = json.loads(content)
-    except (KeyError, IndexError, json.JSONDecodeError, TypeError):
-        request.session["ai_error_detail"] = "OpenRouter response format was unexpected"
-        return []
-
-    if not isinstance(parsed, list):
-        return []
-
-    normalized = []
-    task_id = 1
-    for phase in parsed:
-        if not isinstance(phase, dict):
-            continue
-        resources = []
-        resources_raw = phase.get("resources", [])
-        if isinstance(resources_raw, list):
-            for resource in resources_raw:
-                if isinstance(resource, dict) and resource.get("url"):
-                    resources.append(
-                        {
-                            "title": str(resource.get("title") or resource.get("url")),
-                            "url": str(resource.get("url")),
-                        }
-                    )
-        tasks_raw = phase.get("tasks", [])
-        if not isinstance(tasks_raw, list):
-            tasks_raw = []
-        tasks = []
-        for task_item in tasks_raw:
-            if isinstance(task_item, dict):
-                description = task_item.get("description") or task_item.get("title") or task_item.get("task")
-                steps = task_item.get("steps", [])
-                key_terms = task_item.get("key_terms", [])
-                if not isinstance(steps, list):
-                    steps = []
-                if not isinstance(key_terms, list):
-                    key_terms = []
-                tasks.append(
-                    {
-                        "id": task_id,
-                        "description": str(description or "Task"),
-                        "steps": [str(step) for step in steps],
-                        "learn": str(task_item.get("learn", "")),
-                        "key_terms": [str(term) for term in key_terms],
-                    }
-                )
-            else:
-                tasks.append({"id": task_id, "description": str(task_item), "steps": [], "learn": "", "key_terms": []})
-            task_id += 1
-        normalized.append(
-            {
-                "title": phase.get("title", "Phase"),
-                "description": phase.get("description", ""),
-                "resources": resources,
-                "tasks": tasks,
-            }
-        )
-    return normalized
+        return PremiumRequest.objects.filter(user=user, status="pending").order_by("-requested_at", "-id").first()
+    except OperationalError:
+        return None
 
 
-def _phases_have_guidance(phases):
-    for phase in phases:
-        if phase.get("resources"):
-            return True
-        for task in phase.get("tasks", []):
-            if task.get("steps") or task.get("learn") or task.get("key_terms"):
-                return True
-    return False
+def _get_latest_approved_premium_request(user):
+    try:
+        return PremiumRequest.objects.filter(user=user, status="approved").order_by("-reviewed_at", "-id").first()
+    except OperationalError:
+        return None
+
+
+def plans_view(request):
+    return redirect(f"{reverse('home')}#plans")
 
 
 def _default_guidance_for_task(description, learning_style):
@@ -559,142 +563,63 @@ def recommendations_view(request):
     profile = UserProfile.objects.filter(user=request.user).first()
     recommendations = []
     ai_generated = False
+    reco_limited = False
+    reco_limit = 6
+    remaining = None
+    premium_request_pending = False
+    user_plan_tier, current_plan_name = _get_user_subscription_tier(request.user)
+    is_premium_user = user_plan_tier != "explorer"
 
     if profile:
-        def normalize(value):
-            return str(value or "").strip().lower()
+        premium_request_pending = PremiumRequest.objects.filter(user=request.user, status="pending").exists()
+        is_premium = is_premium_user
+        reco_limit = 6 if is_premium else 3
+        today = date.today().isoformat()
+        last_day = request.session.get("reco_day")
+        if last_day != today:
+            request.session["reco_day"] = today
+            request.session["reco_count"] = 0
 
-        def split_tags(value):
-            return {tag.strip().lower() for tag in str(value or "").split(",") if tag.strip()}
-
-        field = normalize(profile.field)
-        role = normalize(profile.target_role)
-        goal = normalize(profile.learning_goal)
-        tech = normalize(profile.tech_preference)
-        skill = normalize(profile.skill_level)
-        interests = split_tags(profile.interest_tags)
-
-        candidates = [
-            {
-                "title": "AI Resume Matcher",
-                "category": "AI Projects",
-                "difficulty": "intermediate",
-                "summary": "Match resumes to roles using embeddings and ranking.",
-                "stack": ["python", "nlp", "vector search"],
-                "fields": ["ai", "data science"],
-                "roles": ["ml engineer", "data scientist"],
-                "goals": ["portfolio", "skill improvement"],
-                "interests": ["hr", "productivity"],
-            },
-            {
-                "title": "E-commerce Forecasting",
-                "category": "Data Science Projects",
-                "difficulty": "intermediate",
-                "summary": "Forecast demand using time-series signals and promos.",
-                "stack": ["python", "pandas", "forecasting"],
-                "fields": ["data science", "data analytics"],
-                "roles": ["data analyst", "data scientist"],
-                "goals": ["portfolio", "internship"],
-                "interests": ["e-commerce", "retail"],
-            },
-            {
-                "title": "Full Stack Event Booking",
-                "category": "Web Development Projects",
-                "difficulty": "intermediate",
-                "summary": "Build a booking platform with payments and admin tools.",
-                "stack": ["django", "postgresql", "payments"],
-                "fields": ["web development"],
-                "roles": ["full stack", "backend developer"],
-                "goals": ["portfolio", "job"],
-                "interests": ["events", "business"],
-            },
-            {
-                "title": "Mobile Habit Coach",
-                "category": "Mobile Projects",
-                "difficulty": "beginner",
-                "summary": "Create habits, streaks, and reminders on mobile.",
-                "stack": ["flutter", "mobile", "notifications"],
-                "fields": ["mobile development"],
-                "roles": ["mobile developer"],
-                "goals": ["skill improvement", "portfolio"],
-                "interests": ["health", "productivity"],
-            },
-            {
-                "title": "Cybersecurity Phishing Detector",
-                "category": "Cybersecurity Projects",
-                "difficulty": "intermediate",
-                "summary": "Detect malicious URLs using ML features and heuristics.",
-                "stack": ["python", "security", "ml"],
-                "fields": ["cybersecurity", "ai"],
-                "roles": ["security analyst"],
-                "goals": ["portfolio", "skill improvement"],
-                "interests": ["security"],
-            },
-            {
-                "title": "Cloud Cost Optimizer",
-                "category": "Cloud & DevOps Projects",
-                "difficulty": "advanced",
-                "summary": "Track spend and alert on unused cloud resources.",
-                "stack": ["aws", "finops", "dashboards"],
-                "fields": ["cloud", "devops"],
-                "roles": ["devops", "cloud engineer"],
-                "goals": ["job", "portfolio"],
-                "interests": ["cloud", "finance"],
-            },
-            {
-                "title": "Healthcare Scheduler",
-                "category": "Web Development Projects",
-                "difficulty": "intermediate",
-                "summary": "Scheduling and reminders for clinics and patients.",
-                "stack": ["django", "email", "calendar"],
-                "fields": ["web development"],
-                "roles": ["backend developer"],
-                "goals": ["portfolio"],
-                "interests": ["health"],
-            },
-            {
-                "title": "Student Study Planner",
-                "category": "EdTech Projects",
-                "difficulty": "beginner",
-                "summary": "Plan study sprints and track progress.",
-                "stack": ["react", "ui", "analytics"],
-                "fields": ["web development"],
-                "roles": ["frontend developer"],
-                "goals": ["portfolio", "internship"],
-                "interests": ["education"],
-            },
-        ]
-
-        def score(candidate):
-            points = 0
-            if field and field in candidate["fields"]:
-                points += 3
-            if role and role in candidate["roles"]:
-                points += 2
-            if goal and goal in candidate["goals"]:
-                points += 2
-            if tech and tech in candidate["stack"]:
-                points += 2
-            if interests and interests.intersection(set(candidate["interests"])):
-                points += 2
-            if skill and skill == candidate["difficulty"]:
-                points += 1
-            return points
-
-        ranked = sorted(candidates, key=lambda item: (score(item), item["title"]), reverse=True)
-        recommendations = ranked[:6]
-
-        ai_recs = _fetch_ai_recommendations(profile, request)
-        if ai_recs:
-            recommendations = ai_recs
-            ai_generated = True
+        if not is_premium and request.session.get("reco_count", 0) >= reco_limit:
+            reco_limited = True
+            recommendations = request.session.get("recommendations", [])[:reco_limit]
+            remaining = 0
+            return render(
+                request,
+                "users/recommendations.html",
+                {
+                    "profile": profile,
+                    "recommendations": recommendations,
+                    "ai_generated": ai_generated,
+                    "reco_limited": reco_limited,
+                    "reco_limit": reco_limit,
+                    "reco_remaining": remaining,
+                    "premium_request_pending": premium_request_pending,
+                    "current_plan_name": current_plan_name,
+                    "is_premium_user": is_premium_user,
+                },
+            )
+        recommendations = recommend_projects_for_profile(profile, limit=reco_limit, user_plan_tier=user_plan_tier)
 
         request.session["recommendations"] = recommendations
+        if not is_premium:
+            request.session["reco_count"] = request.session.get("reco_count", 0) + 1
+            remaining = max(reco_limit - request.session.get("reco_count", 0), 0)
 
     return render(
         request,
         "users/recommendations.html",
-        {"profile": profile, "recommendations": recommendations, "ai_generated": ai_generated},
+        {
+            "profile": profile,
+            "recommendations": recommendations,
+            "ai_generated": ai_generated,
+            "reco_limited": reco_limited,
+            "reco_limit": reco_limit,
+            "reco_remaining": remaining,
+            "premium_request_pending": premium_request_pending,
+            "current_plan_name": current_plan_name,
+            "is_premium_user": is_premium_user,
+        },
     )
 
 
@@ -706,11 +631,18 @@ def start_recommendation_view(request, index):
         return redirect("recommendations")
 
     project = recommendations[index]
+    project_record = Project.objects.filter(id=project.get("id")).first() if project.get("id") else None
+    workspace = _build_workspace_payload(project_record, project)
+    is_premium_user = _is_premium(request.user)
     profile = UserProfile.objects.filter(user=request.user).first()
     learning_style = _normalize_learning_style(profile.learning_style) if profile else ""
-    show_guidance = bool(learning_style)
+    show_guidance = bool(learning_style and is_premium_user)
     project_id = f"rec-{index}"
     my_projects = request.session.get("my_projects", {})
+    if profile and not _is_premium(request.user) and project_id not in my_projects:
+        if len(my_projects) >= 5:
+            request.session["my_projects_error"] = "Free users can save up to 5 projects. Upgrade to premium for unlimited saves."
+            return redirect("my_projects")
     if project_id not in my_projects:
         my_projects[project_id] = {
             "source": "recommendation",
@@ -727,20 +659,13 @@ def start_recommendation_view(request, index):
 
     if request.GET.get("regen") == "1" or phases_key not in request.session:
         request.session.pop(progress_key, None)
-        phases = _fetch_ai_phases(profile, project, request, learning_style) if profile else []
+        phases = _build_phases_from_tasks(project, workspace.get("task_items", []), learning_style)
         if phases:
             request.session[phases_key] = phases
         else:
             phases = []
     else:
         phases = request.session.get(phases_key, [])
-
-    if show_guidance and phases and not _phases_have_guidance(phases):
-        request.session.pop(progress_key, None)
-        guided_phases = _fetch_ai_phases(profile, project, request, learning_style) if profile else []
-        if guided_phases:
-            phases = guided_phases
-            request.session[phases_key] = phases
 
     if show_guidance and phases:
         phases = _ensure_guidance(phases, learning_style)
@@ -784,7 +709,7 @@ def start_recommendation_view(request, index):
 
     progress_pct = int((completed_tasks / total_tasks) * 100) if total_tasks else 0
     ai_error = not rendered_phases
-    ai_error_detail = request.session.pop("ai_error_detail", "")
+    ai_error_detail = ""
 
     return render(
         request,
@@ -798,6 +723,8 @@ def start_recommendation_view(request, index):
             "ai_error": ai_error,
             "ai_error_detail": ai_error_detail,
             "show_guidance": show_guidance,
+            "workspace": workspace,
+            "is_premium_user": is_premium_user,
         },
     )
 
@@ -805,12 +732,18 @@ def start_recommendation_view(request, index):
 @login_required
 def start_showcase_view(request, slug):
     project = _get_showcase_project(slug)
+    workspace = _build_workspace_payload(None, project)
+    is_premium_user = _is_premium(request.user)
     profile = UserProfile.objects.filter(user=request.user).first()
     learning_style = _normalize_learning_style(profile.learning_style) if profile else ""
-    show_guidance = bool(learning_style)
+    show_guidance = bool(learning_style and is_premium_user)
 
     project_id = f"showcase-{slug}"
     my_projects = request.session.get("my_projects", {})
+    if profile and not _is_premium(request.user) and project_id not in my_projects:
+        if len(my_projects) >= 5:
+            request.session["my_projects_error"] = "Free users can save up to 5 projects. Upgrade to premium for unlimited saves."
+            return redirect("my_projects")
     if project_id not in my_projects:
         my_projects[project_id] = {
             "source": "showcase",
@@ -827,7 +760,7 @@ def start_showcase_view(request, slug):
 
     if request.GET.get("regen") == "1" or phases_key not in request.session:
         request.session.pop(progress_key, None)
-        phases = _fetch_ai_phases(profile, project, request, learning_style) if profile else []
+        phases = _build_phases_from_tasks(project, workspace.get("task_items", []), learning_style)
         if phases:
             request.session[phases_key] = phases
         else:
@@ -877,7 +810,7 @@ def start_showcase_view(request, slug):
 
     progress_pct = int((completed_tasks / total_tasks) * 100) if total_tasks else 0
     ai_error = not rendered_phases
-    ai_error_detail = request.session.pop("ai_error_detail", "")
+    ai_error_detail = ""
 
     return render(
         request,
@@ -891,6 +824,8 @@ def start_showcase_view(request, slug):
             "ai_error": ai_error,
             "ai_error_detail": ai_error_detail,
             "show_guidance": show_guidance,
+            "workspace": workspace,
+            "is_premium_user": is_premium_user,
         },
     )
 
@@ -898,6 +833,7 @@ def start_showcase_view(request, slug):
 @login_required
 def my_projects_view(request):
     my_projects = request.session.get("my_projects", {})
+    my_projects_error = request.session.pop("my_projects_error", "")
     items = []
 
     for project_id, project in my_projects.items():
@@ -927,7 +863,50 @@ def my_projects_view(request):
             }
         )
 
-    return render(request, "users/my_projects.html", {"projects": items})
+    return render(request, "users/my_projects.html", {"projects": items, "my_projects_error": my_projects_error})
+
+
+@login_required
+def request_premium_view(request):
+    if request.method == "POST":
+        plan_id = request.POST.get("plan_id")
+        selected_plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
+        if not selected_plan or selected_plan.price <= 0:
+            request.session["premium_request_error"] = "Please choose a paid plan to request premium access."
+            return redirect("plans")
+
+        active_subscription = _get_active_subscription(request.user)
+        if active_subscription and active_subscription.plan and active_subscription.plan.price > 0:
+            request.session["premium_request_error"] = (
+                f"You already have an active {active_subscription.plan.name} subscription until "
+                f"{active_subscription.end_date}. You can request again after it ends."
+            )
+            return redirect("plans")
+
+        has_pending = PremiumRequest.objects.filter(user=request.user, status="pending").exists()
+        if has_pending:
+            request.session["premium_request_error"] = "You already have a pending premium request. Please wait for admin review."
+            return redirect("plans")
+
+        note = f"Requested plan: {selected_plan.name}"
+        PremiumRequest.objects.create(user=request.user, plan=selected_plan, note=note)
+        request.session["premium_request_success"] = f"Your request for {selected_plan.name} was submitted successfully."
+    return redirect("plans")
+
+
+@login_required
+def remove_my_project_view(request, project_id):
+    if request.method != "POST":
+        return redirect("my_projects")
+
+    my_projects = request.session.get("my_projects", {})
+    if project_id in my_projects:
+        my_projects.pop(project_id, None)
+        request.session["my_projects"] = my_projects
+        request.session.pop(f"phases_{project_id}", None)
+        request.session.pop(f"progress_{project_id}", None)
+
+    return redirect("my_projects")
 
 
 def signup_view(request):
@@ -947,7 +926,8 @@ def signup_view(request):
 @login_required
 def profile_view(request):
     profile = UserProfile.objects.filter(user=request.user).first()
-    return render(request, "users/profile_view.html", {"profile": profile})
+    premium_request = _get_latest_premium_request(request.user)
+    return render(request, "users/profile_view.html", {"profile": profile, "premium_request": premium_request})
 
 
 @login_required
@@ -955,13 +935,24 @@ def profile_create_or_update(request):
     profile = UserProfile.objects.filter(user=request.user).first()
 
     if request.method == "POST":
-        form = UserProfileForm(request.POST, instance=profile)
-        if form.is_valid():
-            user_profile = form.save(commit=False)
+        account_form = UserAccountForm(request.POST, instance=request.user)
+        profile_form = UserProfileForm(request.POST, request.FILES, instance=profile)
+        if account_form.is_valid() and profile_form.is_valid():
+            account_form.save()
+            user_profile = profile_form.save(commit=False)
             user_profile.user = request.user
             user_profile.save()
             return redirect("profile_view")
     else:
-        form = UserProfileForm(instance=profile)
+        account_form = UserAccountForm(instance=request.user)
+        profile_form = UserProfileForm(instance=profile)
 
-    return render(request, "users/profile_form.html", {"form": form})
+    return render(
+        request,
+        "users/profile_form.html",
+        {
+            "account_form": account_form,
+            "profile_form": profile_form,
+            "profile": profile,
+        },
+    )

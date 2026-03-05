@@ -5,8 +5,20 @@
 {% block content %}
 <h1 class="page-title">Recommended Projects</h1>
 <p class="page-sub">Projects tailored to your profile and goals.</p>
+<div class="info-card" style="margin-bottom: 12px;">
+    <span>Current Plan</span>
+    <strong>{{ current_plan_name }}</strong>
+</div>
 {% if ai_generated %}
-    <p class="helper-text">AI-generated suggestions based on your profile.</p>
+    <p class="helper-text">Personalized suggestions based on your profile.</p>
+{% endif %}
+{% if premium_request_pending %}
+    <p class="helper-text">Your premium request is pending admin approval. Free-tier limits apply until approval.</p>
+{% endif %}
+{% if reco_limited %}
+    <p class="helper-text">Daily limit reached for free users. Upgrade to premium for unlimited recommendations.</p>
+{% elif reco_remaining is not None %}
+    <p class="helper-text">Free tier: {{ reco_remaining }} recommendations left today.</p>
 {% endif %}
 
 {% if not profile %}
@@ -20,7 +32,6 @@
             <div class="rec-card">
                 <div class="rec-meta">{{ project.category }} • {{ project.difficulty|title }}</div>
                 <h3>{{ project.title }}</h3>
-                <p class="helper-text">{{ project.summary }}</p>
                 <div class="pill-list">
                     {% for tag in project.stack %}
                         <span class="pill">{{ tag }}</span>

@@ -4,12 +4,22 @@
 
 {% block content %}
     <h1 class="page-title">My Projects</h1>
-    <p class="page-sub">Track your AI-generated project plans and progress.</p>
+    <p class="page-sub">Track your project plans and progress.</p>
+
+    {% if my_projects_error %}
+        <div class="info-card">
+            <p class="helper-text">{{ my_projects_error }}</p>
+        </div>
+    {% endif %}
 
     {% if projects %}
         <div class="recommendations-grid">
             {% for project in projects %}
                 <div class="rec-card">
+                    <form method="post" action="{% url 'remove_my_project' project.id %}">
+                        {% csrf_token %}
+                        <button class="card-close" type="submit" aria-label="Remove project">&times;</button>
+                    </form>
                     <div class="rec-meta">{{ project.category }} · {{ project.difficulty }}</div>
                     <h3>{{ project.title }}</h3>
                     <p class="helper-text">{{ project.summary }}</p>
@@ -31,7 +41,7 @@
     {% else %}
         <div class="info-card">
             <h3>No projects yet</h3>
-            <p class="helper-text">Start a recommendation to generate your first AI project plan.</p>
+            <p class="helper-text">Start a recommendation to generate your first project plan.</p>
             <div class="form-actions">
                 <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
             </div>

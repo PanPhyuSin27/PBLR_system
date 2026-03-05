@@ -1,0 +1,262 @@
+{% extends "users/base.html" %}
+
+{% block title %}Plans{% endblock %}
+
+{% block extra_styles %}
+<style>
+    html {
+        scroll-behavior: smooth;
+    }
+    .pricing-shell {
+        background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 10%, transparent), transparent 58%),
+            linear-gradient(40deg, color-mix(in srgb, var(--glow-b) 65%, transparent), transparent 55%),
+            var(--surface);
+        border: 1px solid var(--stroke);
+        border-radius: 22px;
+        padding: 28px;
+        animation: pricingFade 0.75s ease both;
+    }
+    .pricing-head {
+        text-align: center;
+        margin-bottom: 22px;
+    }
+    .pricing-title {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(28px, 3.2vw, 40px);
+        letter-spacing: -0.01em;
+    }
+    .pricing-sub {
+        margin: 10px auto 0;
+        max-width: 760px;
+        color: var(--muted);
+        font-size: 15px;
+    }
+    .status-row {
+        margin: 0 auto 18px;
+        max-width: 880px;
+    }
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 18px;
+        align-items: stretch;
+    }
+    .price-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        border: 1px solid var(--stroke);
+        border-radius: 18px;
+        padding: 22px;
+        background: color-mix(in srgb, var(--surface) 94%, white 6%);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        animation: pricingFade 0.65s ease both;
+    }
+    .price-card:hover {
+        transform: scale(1.02);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
+        border-color: color-mix(in srgb, var(--accent) 40%, var(--stroke));
+    }
+    .popular {
+        border-color: color-mix(in srgb, var(--accent) 55%, var(--stroke));
+        box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 28%, transparent);
+    }
+    .popular-badge {
+        position: absolute;
+        top: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--accent);
+        color: #fff;
+        border-radius: 999px;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 6px 12px;
+        font-weight: 700;
+    }
+    .plan-name {
+        margin: 0;
+        font-size: 20px;
+        font-family: "Space Grotesk", sans-serif;
+    }
+    .plan-price {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.1;
+    }
+    .plan-price span {
+        font-size: 13px;
+        color: var(--muted);
+        font-weight: 500;
+    }
+    .plan-desc {
+        margin: 0;
+        color: var(--muted);
+        min-height: 42px;
+    }
+    .feature-list {
+        list-style: none;
+        margin: 4px 0 8px;
+        padding: 0;
+        display: grid;
+        gap: 8px;
+    }
+    .feature-list li {
+        display: flex;
+        gap: 8px;
+        align-items: flex-start;
+        font-size: 14px;
+    }
+    .feature-check {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: color-mix(in srgb, var(--accent) 24%, var(--surface));
+        color: color-mix(in srgb, var(--accent) 75%, var(--ink));
+        font-size: 12px;
+        flex: 0 0 auto;
+        margin-top: 1px;
+    }
+    .plan-cta {
+        margin-top: auto;
+        width: 100%;
+        border-radius: 12px;
+        padding: 11px 14px;
+        font-size: 14px;
+        text-align: center;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+    }
+    .btn-outline {
+        border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--stroke));
+        background: transparent;
+        color: var(--ink);
+    }
+    .btn-outline:hover {
+        background: color-mix(in srgb, var(--accent) 10%, transparent);
+        transform: translateY(-1px);
+    }
+    .btn-premium {
+        border: 1px solid transparent;
+        background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 70%, #8b5cf6));
+        color: #fff;
+    }
+    .btn-premium:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 22px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+    .btn-muted {
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--surface) 90%, var(--bg));
+        color: var(--muted);
+        cursor: default;
+    }
+    @keyframes pricingFade {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    @media (max-width: 960px) {
+        .pricing-grid {
+            grid-template-columns: 1fr;
+        }
+        .price-card {
+            max-width: 560px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .pricing-shell {
+            padding: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="pricing-shell" id="pricing">
+    <header class="pricing-head">
+        <h1 class="pricing-title">Simple plans for your learning journey</h1>
+        <p class="pricing-sub">Pick the plan that matches your pace. Start free with Explorer or unlock premium project generation and unlimited progress with Pro.</p>
+    </header>
+
+    {% if premium_request and premium_request.status == 'pending' %}
+        <div class="status-row info-card">
+            <strong>Request Pending</strong>
+            <p class="helper-text">Your premium request is pending admin approval.</p>
+        </div>
+    {% endif %}
+
+    <div class="pricing-grid">
+        {% for plan in plans %}
+            <article class="price-card {% if 'Pro Monthly' in plan.name %}popular{% endif %}">
+                {% if 'Pro Monthly' in plan.name %}
+                    <span class="popular-badge">Most Popular</span>
+                {% endif %}
+
+                <h2 class="plan-name">{{ plan.name }}</h2>
+                <p class="plan-price">
+                    {{ plan.price }} MMK
+                    <span>
+                        {% if plan.price == 0 %}
+                            / forever
+                        {% elif 'Yearly' in plan.name %}
+                            / year
+                        {% else %}
+                            / month
+                        {% endif %}
+                    </span>
+                </p>
+                <p class="plan-desc">{{ plan.description }}</p>
+
+                <ul class="feature-list">
+                    {% if 'Explorer' in plan.name %}
+                        <li><span class="feature-check">✓</span><span>Up to 3 recommendations per day</span></li>
+                        <li><span class="feature-check">✓</span><span>Save up to 5 projects</span></li>
+                        <li><span class="feature-check">✓</span><span>Profile-based learning guidance</span></li>
+                    {% elif 'Yearly' in plan.name %}
+                        <li><span class="feature-check">✓</span><span>Unlimited recommendations and project plans</span></li>
+                        <li><span class="feature-check">✓</span><span>Priority project updates + richer outputs</span></li>
+                        <li><span class="feature-check">✓</span><span>Best value annual billing</span></li>
+                    {% else %}
+                        <li><span class="feature-check">✓</span><span>Unlimited recommendations and project plans</span></li>
+                        <li><span class="feature-check">✓</span><span>Unlimited saved projects and progress tracking</span></li>
+                        <li><span class="feature-check">✓</span><span>Faster support and premium access</span></li>
+                    {% endif %}
+                </ul>
+
+                {% if not user.is_authenticated %}
+                    {% if plan.price == 0 %}
+                        <a class="btn plan-cta btn-outline" href="{% url 'signup' %}">Get Started</a>
+                    {% else %}
+                        <a class="btn plan-cta btn-premium" href="{% url 'signup' %}">Upgrade Now</a>
+                    {% endif %}
+                {% elif active_subscription and active_subscription.plan_id == plan.id and active_subscription.is_active %}
+                    <span class="btn plan-cta btn-muted">Approved • Active</span>
+                {% elif plan.price == 0 %}
+                    <span class="btn plan-cta btn-outline">Default Plan</span>
+                {% elif premium_request and premium_request.status == 'pending' %}
+                    <span class="btn plan-cta btn-muted">Request Pending</span>
+                {% else %}
+                    <form method="post" action="{% url 'request_premium' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="plan_id" value="{{ plan.id }}" />
+                        <button class="btn plan-cta btn-premium" type="submit">Upgrade Now</button>
+                    </form>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

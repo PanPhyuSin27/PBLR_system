@@ -8,14 +8,23 @@ class UserProfileForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = [
+            "profile_picture",
             "field",
             "target_role",
             "skill_level",
             "tech_preference",
             "learning_goal",
             "interest_tags",
-            "learning_style",
         ]
+        widgets = {
+            "profile_picture": forms.FileInput(attrs={"accept": "image/*"}),
+        }
+
+
+class UserAccountForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username", "email"]
 
 
 class SignUpForm(UserCreationForm):

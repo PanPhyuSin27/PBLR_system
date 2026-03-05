@@ -7,6 +7,10 @@
         rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap"
     />
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
     <style>
         :root {
             --ink: #0c0d0f;
@@ -63,16 +67,21 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 12px 0 28px;
+            padding: 12px 16px;
             position: sticky;
             top: 0;
             z-index: 20;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--stroke);
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.76));
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            border-radius: 18px;
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+            margin-bottom: 24px;
         }
         [data-theme="dark"] .nav {
-            background: rgba(15, 18, 21, 0.88);
+            background: linear-gradient(120deg, rgba(18, 22, 28, 0.92), rgba(18, 22, 28, 0.8));
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
         }
         .nav-right {
             display: flex;
@@ -91,21 +100,116 @@
             width: 36px;
             height: 36px;
             border-radius: 10px;
-            background: linear-gradient(135deg, #1f2937, #0f172a);
+            background: linear-gradient(135deg, #ff7a3c, #ff5b2e 55%, #ef4444);
             display: grid;
             place-items: center;
             color: #fff;
             font-size: 16px;
+            box-shadow: 0 10px 18px rgba(255, 111, 61, 0.34);
         }
         .nav-links {
             display: flex;
-            gap: 18px;
+            gap: 16px;
             align-items: center;
             font-size: 14px;
             color: var(--muted);
         }
+        .nav-links a,
+        .profile-trigger {
+            padding-bottom: 2px;
+            border-bottom: 2px solid transparent;
+            transition: color 0.24s ease, border-color 0.24s ease;
+            position: relative;
+            font-weight: 600;
+        }
+        .nav-links a::after,
+        .profile-trigger::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 100%;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #ff8a5b, #ff5b2e);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.24s ease;
+        }
         .nav-links a:hover {
             color: var(--ink);
+            border-color: transparent;
+        }
+        .nav-links a:hover::after {
+            transform: scaleX(1);
+        }
+        .profile-trigger {
+            border: 0;
+            background: transparent;
+            color: var(--muted);
+            font: inherit;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .profile-trigger:hover,
+        .profile-menu.open .profile-trigger {
+            color: var(--ink);
+            border-color: transparent;
+        }
+        .profile-trigger:hover::after,
+        .profile-menu.open .profile-trigger::after {
+            transform: scaleX(1);
+        }
+        .profile-menu {
+            position: relative;
+        }
+        .profile-dropdown {
+            position: absolute;
+            right: 0;
+            top: calc(100% + 8px);
+            min-width: 190px;
+            border: 1px solid var(--stroke);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.96);
+            box-shadow: 0 14px 24px rgba(15, 23, 42, 0.14);
+            padding: 8px;
+            display: none;
+            z-index: 30;
+            backdrop-filter: blur(12px);
+        }
+        [data-theme="dark"] .profile-dropdown {
+            background: rgba(18, 22, 28, 0.95);
+        }
+        .profile-menu.open .profile-dropdown {
+            display: grid;
+            gap: 4px;
+        }
+        .profile-dropdown a,
+        .profile-dropdown button {
+            width: 100%;
+            text-align: left;
+            border: 0;
+            background: transparent;
+            color: var(--ink);
+            padding: 10px 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .profile-dropdown a:hover,
+        .profile-dropdown button:hover {
+            background: rgba(15, 23, 42, 0.06);
+        }
+        [data-theme="dark"] .profile-dropdown a:hover,
+        [data-theme="dark"] .profile-dropdown button:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .profile-dropdown form {
+            margin: 0;
         }
         .nav-login {
             border: 1px solid var(--stroke);
@@ -248,6 +352,141 @@
                 justify-content: center;
             }
         }
+
+        .auth-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 20, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+            padding: 16px;
+        }
+
+        .auth-overlay.show {
+            display: flex;
+        }
+
+        .auth-modal {
+            width: auto;
+            max-width: 96vw;
+            max-height: 92vh;
+            border-radius: 0;
+            overflow: visible;
+            border: 0;
+            background: transparent;
+            position: relative;
+            box-shadow: none;
+        }
+
+        .auth-close {
+            position: absolute;
+            right: -14px;
+            top: -14px;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            color: #111827;
+            font-size: 18px;
+            line-height: 1;
+            cursor: pointer;
+            z-index: 3;
+        }
+
+        .auth-content {
+            width: auto;
+            height: auto;
+            overflow: visible;
+            padding: 0;
+        }
+
+        .auth-content .auth-shell {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .auth-content .auth-card {
+            width: 100%;
+            background: var(--surface);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--stroke);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
+            text-align: center;
+        }
+
+        .auth-content .field-group {
+            text-align: left;
+            margin-bottom: 12px;
+        }
+
+        .auth-content .field-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--stroke);
+            border-radius: 10px;
+            background: #f7f7f7;
+        }
+
+        [data-theme="dark"] .auth-content .field-group input {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--ink);
+        }
+
+        .auth-content .auth-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #111;
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .auth-content .divider {
+            margin: 12px 0 16px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .auth-content .socials {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            font-size: 18px;
+        }
+
+        .auth-content .socials button,
+        .auth-content .socials a.social-btn {
+            border: none;
+            background: #eee;
+            padding: 8px 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: inherit;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-content .socials a.social-btn svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        .auth-content .error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 4px;
+        }
     </style>
 </head>
 <body>
@@ -260,28 +499,38 @@
             <div class="nav-right">
                 <div class="nav-links">
                     <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'home' %}#plans">Plans</a>
                     <a href="{% url 'signup' %}">Get started</a>
                 </div>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'profile_edit' %}">Profile</a>
-                    <a href="{% url 'my_projects' %}">My Projects</a>
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button class="nav-login" type="submit">Logout</button>
-                    </form>
+                    <div class="profile-menu" data-profile-menu>
+                        <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false">
+                            Profile ▾
+                        </button>
+                        <div class="profile-dropdown" data-profile-dropdown>
+                            <a href="{% url 'profile_view' %}">View Profile</a>
+                            <a href="{% url 'profile_edit' %}">Edit Profile</a>
+                            <a href="{% url 'my_projects' %}">My Projects</a>
+                            <button type="button" data-theme-toggle>Switch Theme</button>
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit">Logout</button>
+                            </form>
+                        </div>
+                    </div>
                 {% else %}
                     <a class="nav-login" href="{% url 'login' %}">Log in</a>
                     <a class="nav-login" href="{% url 'signup' %}">Sign up</a>
+                    <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                        <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                        </svg>
+                        <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="4" />
+                            <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                        </svg>
+                    </button>
                 {% endif %}
-                <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
-                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
-                    </svg>
-                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="4" />
-                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-                    </svg>
-                </button>
             </div>
         </nav>
 
@@ -566,9 +815,21 @@
             </div>
         </section>
     </div>
+    <div class="auth-overlay" data-auth-overlay aria-hidden="true">
+        <div class="auth-modal" role="dialog" aria-modal="true" aria-label="Authentication">
+            <button class="auth-close" type="button" data-auth-close aria-label="Close">×</button>
+            <div class="auth-content" data-auth-content></div>
+        </div>
+    </div>
     <script>
         const root = document.documentElement;
         const toggle = document.querySelector("[data-theme-toggle]");
+        const authOverlay = document.querySelector("[data-auth-overlay]");
+        const authContent = document.querySelector("[data-auth-content]");
+        const authClose = document.querySelector("[data-auth-close]");
+        const profileMenu = document.querySelector("[data-profile-menu]");
+        const profileToggle = document.querySelector("[data-profile-toggle]");
+        let currentAuthUrl = "";
 
         const storedTheme = localStorage.getItem("theme");
         if (storedTheme) {
@@ -587,6 +848,159 @@
             root.setAttribute("data-theme", nextTheme);
             localStorage.setItem("theme", nextTheme);
             setToggleLabel();
+        });
+
+        if (profileMenu && profileToggle) {
+            profileToggle.addEventListener("click", (event) => {
+                event.stopPropagation();
+                const nextOpen = !profileMenu.classList.contains("open");
+                profileMenu.classList.toggle("open", nextOpen);
+                profileToggle.setAttribute("aria-expanded", nextOpen ? "true" : "false");
+            });
+
+            document.addEventListener("click", (event) => {
+                if (!profileMenu.contains(event.target)) {
+                    profileMenu.classList.remove("open");
+                    profileToggle.setAttribute("aria-expanded", "false");
+                }
+            });
+        }
+
+        const loginPath = "{% url 'login' %}";
+        const signupPath = "{% url 'signup' %}";
+        const isAuthPath = (path) => path === loginPath || path === signupPath;
+
+        const normalizeAuthHtml = (html) => {
+            const doc = new DOMParser().parseFromString(html, "text/html");
+            const card = doc.querySelector(".auth-card");
+            if (!card) {
+                return "";
+            }
+            return `<div class="auth-shell single"><section class="auth-card">${card.innerHTML}</section></div>`;
+        };
+
+        const bindAuthContent = () => {
+            if (!authContent) {
+                return;
+            }
+
+            const authLinks = authContent.querySelectorAll("a[href]");
+            authLinks.forEach((link) => {
+                link.addEventListener("click", (event) => {
+                    const href = link.getAttribute("href") || "";
+                    let parsed;
+                    try {
+                        parsed = new URL(href, window.location.origin);
+                    } catch (error) {
+                        return;
+                    }
+                    if (!isAuthPath(parsed.pathname)) {
+                        return;
+                    }
+                    event.preventDefault();
+                    openAuthOverlay(parsed.toString());
+                });
+            });
+
+            const form = authContent.querySelector("form");
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                const action = form.getAttribute("action") || currentAuthUrl || window.location.href;
+                const payload = new FormData(form);
+                const response = await fetch(action, {
+                    method: "POST",
+                    body: payload,
+                    credentials: "same-origin",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    redirect: "follow",
+                });
+                const finalUrl = response.url || action;
+                const finalPath = new URL(finalUrl, window.location.origin).pathname;
+                if (!isAuthPath(finalPath)) {
+                    window.location.href = finalUrl;
+                    return;
+                }
+                const html = await response.text();
+                authContent.innerHTML = normalizeAuthHtml(html) || "<p class=\"helper-text\">Unable to load form.</p>";
+                currentAuthUrl = finalUrl;
+                bindAuthContent();
+            });
+        };
+
+        const openAuthOverlay = async (url) => {
+            if (!authOverlay || !authContent) {
+                window.location.href = url;
+                return;
+            }
+            const response = await fetch(url, {
+                credentials: "same-origin",
+                headers: { "X-Requested-With": "XMLHttpRequest" },
+                redirect: "follow",
+            });
+            const html = await response.text();
+            authContent.innerHTML = normalizeAuthHtml(html) || "<p class=\"helper-text\">Unable to load form.</p>";
+            currentAuthUrl = response.url || url;
+            authOverlay.classList.add("show");
+            authOverlay.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+            bindAuthContent();
+        };
+
+        const closeAuthOverlay = () => {
+            if (!authOverlay || !authContent) {
+                return;
+            }
+            authOverlay.classList.remove("show");
+            authOverlay.setAttribute("aria-hidden", "true");
+            authContent.innerHTML = "";
+            currentAuthUrl = "";
+            document.body.style.overflow = "";
+        };
+
+        if (authClose) {
+            authClose.addEventListener("click", closeAuthOverlay);
+        }
+
+        if (authOverlay) {
+            authOverlay.addEventListener("click", (event) => {
+                if (event.target === authOverlay) {
+                    closeAuthOverlay();
+                }
+            });
+        }
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && authOverlay && authOverlay.classList.contains("show")) {
+                closeAuthOverlay();
+            }
+        });
+
+        document.addEventListener("click", (event) => {
+            if (event.defaultPrevented) {
+                return;
+            }
+            const link = event.target.closest("a[href]");
+            if (!link) {
+                return;
+            }
+            if (link.target === "_blank" || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                return;
+            }
+            let parsed;
+            try {
+                parsed = new URL(link.href, window.location.origin);
+            } catch (error) {
+                return;
+            }
+            if (parsed.origin !== window.location.origin || !isAuthPath(parsed.pathname)) {
+                return;
+            }
+            event.preventDefault();
+            openAuthOverlay(parsed.toString());
         });
     </script>
 </body>
