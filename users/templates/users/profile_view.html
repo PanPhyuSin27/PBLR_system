@@ -61,6 +61,13 @@
 <h1 class="page-title">Your Profile</h1>
 <p class="page-sub">Keep your learning preferences up to date for better recommendations.</p>
 
+{% if saved %}
+    <div class="info-card" style="border-color: #bbf7d0; background: #f0fdf4; margin-bottom: 12px;">
+        <strong style="display:block; margin-bottom: 8px;">Profile saved successfully.</strong>
+        <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
+    </div>
+{% endif %}
+
 <div class="profile-view-stack">
     <section class="profile-view-card">
         <div class="profile-view-user">
@@ -111,6 +118,9 @@
                     <span>Interest Tags</span>
                     <strong>{{ profile.interest_tags }}</strong>
                 </div>
+            </div>
+            <div class="form-actions" style="margin-top: 14px;">
+                <a class="btn btn-primary" href="{% url 'recommendations' %}">View Recommendations</a>
             </div>
         {% else %}
             <div class="empty-state">

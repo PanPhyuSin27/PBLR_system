@@ -253,6 +253,56 @@
             padding: 28px;
             box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
         }
+        .site-footer {
+            margin-top: 26px;
+            background: #e7ebf1;
+            border-top: 1px solid #d3dae6;
+            border-radius: 18px;
+            padding: 0;
+            color: #0f172a;
+        }
+        [data-theme="dark"] .site-footer {
+            background: #151b25;
+            border-top-color: #2a3342;
+            color: #e8edf8;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 24px;
+            padding: 28px 0;
+        }
+        .footer-col h4 {
+            margin: 0 0 10px;
+            font-family: "Manrope", sans-serif;
+            font-size: 18px;
+            color: inherit;
+        }
+        .footer-col a {
+            display: block;
+            margin: 0 0 8px;
+            color: #1f2a3a;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        [data-theme="dark"] .footer-col a {
+            color: #c6d0e0;
+        }
+        .footer-col a:hover {
+            color: #1458c0;
+        }
+        .footer-bottom {
+            padding: 0 0 16px;
+            font-size: 13px;
+            color: #5b6678;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        [data-theme="dark"] .footer-bottom {
+            color: #93a0b5;
+        }
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -438,6 +488,9 @@
             .recommendations-grid {
                 grid-template-columns: 1fr;
             }
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
             .nav {
                 flex-direction: column;
                 gap: 16px;
@@ -592,8 +645,16 @@
                 RecoMagic
             </a>
             <div class="nav-actions">
+                {% url 'project_library' as project_library_url %}
+                {% url 'resources' as resources_url %}
                 {% if user.is_authenticated %}
                     <a href="{% url 'home' %}">Home</a>
+                    {% if request.path != project_library_url %}
+                        <a href="{{ project_library_url }}">Project Library</a>
+                    {% endif %}
+                    {% if request.path != resources_url %}
+                        <a href="{{ resources_url }}">Resources</a>
+                    {% endif %}
                     <a href="{% url 'home' %}#plans">Plans</a>
                     <div class="profile-menu" data-profile-menu>
                         <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false">
@@ -611,6 +672,12 @@
                         </div>
                     </div>
                 {% else %}
+                    {% if request.path != project_library_url %}
+                        <a href="{{ project_library_url }}">Project Library</a>
+                    {% endif %}
+                    {% if request.path != resources_url %}
+                        <a href="{{ resources_url }}">Resources</a>
+                    {% endif %}
                     <a href="{% url 'home' %}#plans">Plans</a>
                     <a href="{% url 'login' %}">Login</a>
                     <a class="btn btn-primary" href="{% url 'signup' %}">Sign Up</a>
@@ -630,6 +697,43 @@
         <main class="content">
             {% block content %}{% endblock %}
         </main>
+
+        <footer class="site-footer">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'project_library' %}">Project Library</a>
+                    <a href="{% url 'resources' %}">Resources</a>
+                    <a href="{% url 'home' %}#plans">Plans</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Learning</h4>
+                    <a href="{% url 'recommendations' %}">Recommendations</a>
+                    <a href="{% url 'projects' %}">All Projects</a>
+                    <a href="{% url 'my_projects' %}">My Projects</a>
+                    <a href="{% url 'project_library' %}">Learning Tracks</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <a href="{% url 'profile_view' %}">View Profile</a>
+                    <a href="{% url 'profile_edit' %}">Edit Profile</a>
+                    <a href="{% url 'login' %}">Log In</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="{% url 'resources' %}">Learning Resources</a>
+                    <a href="{% url 'project_library' %}">Project Guide</a>
+                    <a href="{% url 'home' %}#plans">Subscription Help</a>
+                    <a href="{% url 'home' %}#faq">FAQ</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© RecoMagic 2026</span>
+                <span>Built with Django and project-based learning.</span>
+            </div>
+        </footer>
     </div>
     <div class="auth-overlay" data-auth-overlay aria-hidden="true">
         <div class="auth-modal" role="dialog" aria-modal="true" aria-label="Authentication">

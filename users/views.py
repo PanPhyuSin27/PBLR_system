@@ -1,14 +1,16 @@
-from datetime import date, timedelta
+from datetime import timedelta
+from collections import OrderedDict
 from django.utils import timezone
 from django.db.utils import OperationalError
 
 from django.conf import settings
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from .forms import SignUpForm, UserAccountForm, UserProfileForm
-from .models import Plan, PremiumRequest, Project, Subscription, UserProfile
+from .models import DailyRecommendationUsage, Plan, PremiumRequest, Project, Subscription, UserProfile
 from .recommendation_service import recommend_projects_for_profile
 
 
@@ -52,219 +54,111 @@ def home_view(request):
     )
 
 
-def projects_view(request): 
-    return render(request, "users/projects.html")
+def _split_csv_tags(value):
+    return [item.strip() for item in str(value or "").split(",") if item.strip()]
+
+
+def _project_to_card(project_record):
+    return {
+        "id": project_record.id,
+        "title": project_record.title,
+        "summary": project_record.description,
+        "difficulty": project_record.get_skill_level_display(),
+        "plan": project_record.get_required_plan_display(),
+        "tags": _split_csv_tags(project_record.tech_preference)[:3] or _split_csv_tags(project_record.interest_tags)[:3],
+    }
+
+
+def projects_view(request):
+    query = str(request.GET.get("q") or "").strip()
+    projects_qs = Project.objects.all()
+    user_tier = "explorer"
+
+    if request.user.is_authenticated:
+        user_tier, _ = _get_user_subscription_tier(request.user)
+
+    if user_tier == "explorer":
+        projects_qs = projects_qs.filter(required_plan="explorer")
+
+    if query:
+        projects_qs = projects_qs.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(field__icontains=query)
+            | Q(target_role__icontains=query)
+            | Q(tech_preference__icontains=query)
+            | Q(interest_tags__icontains=query)
+        )
+
+    projects_qs = projects_qs.order_by("field", "title", "id")
+
+    grouped = OrderedDict()
+    for project_record in projects_qs:
+        field_name = str(project_record.field or "General").strip() or "General"
+        grouped.setdefault(field_name, []).append(_project_to_card(project_record))
+
+    project_groups = [{"name": name, "projects": items} for name, items in grouped.items()]
+
+    return render(
+        request,
+        "users/projects.html",
+        {
+            "project_groups": project_groups,
+            "project_count": projects_qs.count(),
+            "search_query": query,
+            "is_explorer_view": user_tier == "explorer",
+        },
+    )
+
+
+@login_required(login_url="login")
+def project_library_view(request):
+    user_tier = "explorer"
+    if request.user.is_authenticated:
+        user_tier, _ = _get_user_subscription_tier(request.user)
+
+    per_category_limit = 2 if user_tier == "explorer" else 5
+    projects_qs = Project.objects.all()
+    if user_tier == "explorer":
+        projects_qs = projects_qs.filter(required_plan="explorer")
+
+    projects_qs = projects_qs.order_by("field", "title", "id")
+
+    grouped = OrderedDict()
+    grouped_total = {}
+
+    for project_record in projects_qs:
+        field_name = str(project_record.field or "General").strip() or "General"
+        grouped_total[field_name] = grouped_total.get(field_name, 0) + 1
+
+        cards = grouped.setdefault(field_name, [])
+        if len(cards) < per_category_limit:
+            cards.append(_project_to_card(project_record))
+
+    library_groups = [
+        {
+            "name": name,
+            "projects": projects,
+            "total": grouped_total.get(name, len(projects)),
+        }
+        for name, projects in grouped.items()
+    ]
+
+    return render(
+        request,
+        "users/project_library.html",
+        {
+            "library_groups": library_groups,
+            "per_category_limit": per_category_limit,
+            "is_explorer_view": user_tier == "explorer",
+        },
+    )
+
+
+def resources_view(request):
+    return render(request, "users/resources.html")
 
                      
-def _normalize_learning_style(value):
-    if not value:
-        return ""
-    raw = str(value).strip().lower()
-    mapping = {
-        "step-by-step": "step_by_step",
-        "step by step": "step_by_step",
-        "step_by_step": "step_by_step",
-        "hands-on": "hands_on",
-        "hands on": "hands_on",
-        "hands_on": "hands_on",
-        "visual + examples": "visual_examples",
-        "visual examples": "visual_examples",
-        "visual_examples": "visual_examples",
-        "short lessons + practice": "short_lessons",
-        "short lessons": "short_lessons",
-        "short_lessons": "short_lessons",
-        "guided checklist": "guided_checklist",
-        "guided_checklist": "guided_checklist",
-    }
-    return mapping.get(raw, raw)
-
-
-SHOWCASE_PROJECTS = {
-    "resume-matcher": {
-        "title": "Resume Matcher",
-        "category": "AI Projects",
-        "difficulty": "intermediate",
-        "summary": "Score resumes against job descriptions using embeddings.",
-        "stack": ["NLP", "Vector Search", "Python"],
-    },
-    "customer-support-copilot": {
-        "title": "Customer Support Copilot",
-        "category": "AI Projects",
-        "difficulty": "intermediate",
-        "summary": "Summarize tickets and suggest responses with LLMs.",
-        "stack": ["LLM", "RAG", "Workflow"],
-    },
-    "visual-quality-inspector": {
-        "title": "Visual Quality Inspector",
-        "category": "AI Projects",
-        "difficulty": "intermediate",
-        "summary": "Detect product defects using image classification.",
-        "stack": ["Computer Vision", "CNN", "MLOps"],
-    },
-    "smart-meeting-notes": {
-        "title": "Smart Meeting Notes",
-        "category": "AI Projects",
-        "difficulty": "intermediate",
-        "summary": "Transcribe and extract action items automatically.",
-        "stack": ["ASR", "Summarization", "Productivity"],
-    },
-    "sales-insight-dashboard": {
-        "title": "Sales Insight Dashboard",
-        "category": "Data Science Projects",
-        "difficulty": "intermediate",
-        "summary": "Analyze revenue, cohorts, and growth trends with visuals.",
-        "stack": ["Pandas", "BI", "Metrics"],
-    },
-    "customer-churn-model": {
-        "title": "Customer Churn Model",
-        "category": "Data Science Projects",
-        "difficulty": "intermediate",
-        "summary": "Predict churn risk and highlight retention levers.",
-        "stack": ["Classification", "Feature Eng", "Python"],
-    },
-    "price-elasticity-study": {
-        "title": "Price Elasticity Study",
-        "category": "Data Science Projects",
-        "difficulty": "intermediate",
-        "summary": "Measure demand sensitivity using regression models.",
-        "stack": ["Regression", "Econometrics", "Forecasting"],
-    },
-    "ab-test-analyzer": {
-        "title": "A/B Test Analyzer",
-        "category": "Data Science Projects",
-        "difficulty": "intermediate",
-        "summary": "Automate experiment results and significance checks.",
-        "stack": ["Stats", "Experimentation", "Reporting"],
-    },
-    "job-board-api": {
-        "title": "Job Board API",
-        "category": "Web Development Projects",
-        "difficulty": "intermediate",
-        "summary": "Create a REST API with auth, filtering, and role-based access.",
-        "stack": ["Django", "REST", "JWT"],
-    },
-    "portfolio-builder": {
-        "title": "Portfolio Builder",
-        "category": "Web Development Projects",
-        "difficulty": "beginner",
-        "summary": "Design a responsive site builder with templates and previews.",
-        "stack": ["React", "UI", "Responsive"],
-    },
-    "freelance-crm": {
-        "title": "Freelance CRM",
-        "category": "Web Development Projects",
-        "difficulty": "intermediate",
-        "summary": "Manage clients, invoices, and email workflows.",
-        "stack": ["PostgreSQL", "Email", "SaaS"],
-    },
-    "event-booking-platform": {
-        "title": "Event Booking Platform",
-        "category": "Web Development Projects",
-        "difficulty": "intermediate",
-        "summary": "Handle listings, ticketing, and secure checkout flows.",
-        "stack": ["Stripe", "Payments", "UX"],
-    },
-    "habit-coach-app": {
-        "title": "Habit Coach App",
-        "category": "Mobile Projects",
-        "difficulty": "beginner",
-        "summary": "Build streaks, reminders, and progress charts on mobile.",
-        "stack": ["Flutter", "Charts", "Notifications"],
-    },
-    "campus-navigator": {
-        "title": "Campus Navigator",
-        "category": "Mobile Projects",
-        "difficulty": "intermediate",
-        "summary": "Interactive maps with routing and accessibility layers.",
-        "stack": ["Maps", "Geolocation", "UX"],
-    },
-    "meal-planner": {
-        "title": "Meal Planner",
-        "category": "Mobile Projects",
-        "difficulty": "beginner",
-        "summary": "Plan weekly meals, track macros, and auto-generate lists.",
-        "stack": ["Health", "Offline", "Sync"],
-    },
-    "expense-tracker": {
-        "title": "Expense Tracker",
-        "category": "Mobile Projects",
-        "difficulty": "beginner",
-        "summary": "Scan receipts and categorize spending on-device.",
-        "stack": ["OCR", "FinTech", "Insights"],
-    },
-    "serverless-image-api": {
-        "title": "Serverless Image API",
-        "category": "Cloud & DevOps Projects",
-        "difficulty": "intermediate",
-        "summary": "Resize and optimize images with on-demand functions.",
-        "stack": ["AWS", "Lambda", "S3"],
-    },
-    "cicd-control-center": {
-        "title": "CI/CD Control Center",
-        "category": "Cloud & DevOps Projects",
-        "difficulty": "intermediate",
-        "summary": "Monitor pipelines, deployments, and alerts.",
-        "stack": ["Docker", "CI", "Observability"],
-    },
-    "infra-cost-optimizer": {
-        "title": "Infra Cost Optimizer",
-        "category": "Cloud & DevOps Projects",
-        "difficulty": "advanced",
-        "summary": "Track cloud spend and flag underused services.",
-        "stack": ["FinOps", "Dashboards", "Alerts"],
-    },
-    "observability-starter-kit": {
-        "title": "Observability Starter Kit",
-        "category": "Cloud & DevOps Projects",
-        "difficulty": "intermediate",
-        "summary": "Set up logs, traces, and SLO dashboards quickly.",
-        "stack": ["OpenTelemetry", "SLO", "Grafana"],
-    },
-    "phishing-detection": {
-        "title": "Phishing Detection",
-        "category": "Cybersecurity Projects",
-        "difficulty": "intermediate",
-        "summary": "Detect suspicious URLs with ML features and heuristics.",
-        "stack": ["Security", "ML", "Python"],
-    },
-    "password-health-scanner": {
-        "title": "Password Health Scanner",
-        "category": "Cybersecurity Projects",
-        "difficulty": "beginner",
-        "summary": "Audit password strength and policy compliance.",
-        "stack": ["Policies", "Risk", "CLI"],
-    },
-    "threat-log-explorer": {
-        "title": "Threat Log Explorer",
-        "category": "Cybersecurity Projects",
-        "difficulty": "intermediate",
-        "summary": "Search security logs and flag anomalies.",
-        "stack": ["SIEM", "Detection", "Analytics"],
-    },
-    "secure-file-vault": {
-        "title": "Secure File Vault",
-        "category": "Cybersecurity Projects",
-        "difficulty": "intermediate",
-        "summary": "Encrypt files with key management and access auditing.",
-        "stack": ["Encryption", "IAM", "Compliance"],
-    },
-}
-
-
-def _get_showcase_project(slug):
-    project = SHOWCASE_PROJECTS.get(slug)
-    if project:
-        return project.copy()
-    title = str(slug or "showcase project").replace("-", " ").title()
-    return {
-        "title": title,
-        "category": "Showcase Projects",
-        "difficulty": "intermediate",
-        "summary": "Showcase project from the library.",
-        "stack": [],
-    }
-
-
 def _build_default_phases(project):
     title = str(project.get("title") or "Project").strip()
     category = str(project.get("category") or "General").strip()
@@ -303,12 +197,6 @@ def _build_default_phases(project):
             ],
         },
     ]
-
-
-def _build_local_phases(profile, project, learning_style=None):
-    phases = _build_default_phases(project)
-    return _ensure_guidance(phases, learning_style)
-
 
 def _split_lines(value):
     lines = []
@@ -353,7 +241,6 @@ def _build_workspace_payload(project_record, fallback_project):
             "resources": _parse_resources(project_record.resources),
             "task_items": tasks,
             "detailed_roadmap": _split_lines(project_record.detailed_roadmap),
-            "github_starter_template": project_record.github_starter_template,
             "premium_hints": _split_lines(project_record.premium_hints),
         }
 
@@ -369,12 +256,11 @@ def _build_workspace_payload(project_record, fallback_project):
             "Test and improve quality",
         ],
         "detailed_roadmap": [],
-        "github_starter_template": "",
         "premium_hints": [],
     }
 
 
-def _build_phases_from_tasks(project, task_items, learning_style=None):
+def _build_phases_from_tasks(project, task_items):
     tasks = []
     for idx, item in enumerate(task_items, start=1):
         tasks.append({"id": idx, "description": item, "steps": [], "learn": "", "key_terms": []})
@@ -386,7 +272,7 @@ def _build_phases_from_tasks(project, task_items, learning_style=None):
             "tasks": tasks,
         }
     ]
-    return _ensure_guidance(phases, learning_style)
+    return phases
 
 
 def _tier_from_plan_name(plan_name):
@@ -459,105 +345,6 @@ def plans_view(request):
     return redirect(f"{reverse('home')}#plans")
 
 
-def _default_guidance_for_task(description, learning_style):
-    task_text = str(description or "this task").strip()
-    learning_style = _normalize_learning_style(learning_style)
-    style_map = {
-        "step_by_step": [
-            "Define the goal and acceptance criteria",
-            "List the inputs, outputs, and constraints",
-            "Implement in small, ordered steps",
-            "Verify against the criteria",
-            "Summarize what changed",
-        ],
-        "hands_on": [
-            "Build a quick prototype",
-            "Run it and observe behavior",
-            "Tweak parameters and compare results",
-            "Harden the final version",
-        ],
-        "visual_examples": [
-            "Sketch the flow or UI",
-            "Collect 1-2 reference examples",
-            "Replicate the core pattern",
-            "Adapt it to your scenario",
-        ],
-        "short_lessons": [
-            "Read a 5-10 min primer",
-            "Try a micro exercise",
-            "Apply the concept to the task",
-            "Review and refine",
-        ],
-        "guided_checklist": [
-            "Confirm prerequisites",
-            "Complete checklist items",
-            "Validate expected output",
-            "Mark the task done",
-        ],
-    }
-
-    steps = style_map.get(learning_style, style_map["step_by_step"]).copy()
-
-    learn_templates = {
-        "step_by_step": f"Focus on clear criteria and ordered execution for: {task_text}.",
-        "hands_on": f"Learn by building and iterating directly on: {task_text}.",
-        "visual_examples": f"Use examples and visual flow to guide: {task_text}.",
-        "short_lessons": f"Apply a short lesson, then practice on: {task_text}.",
-        "guided_checklist": f"Follow a checklist to complete: {task_text}.",
-    }
-    learn = learn_templates.get(learning_style, learn_templates["step_by_step"]).strip()
-
-    stopwords = {
-        "the",
-        "and",
-        "with",
-        "this",
-        "that",
-        "from",
-        "your",
-        "into",
-        "for",
-        "then",
-        "when",
-        "what",
-        "how",
-        "build",
-        "make",
-        "create",
-        "setup",
-    }
-    words = [
-        word.strip(".,:;!?")
-        for word in str(description or "").lower().split()
-        if len(word.strip(".,:;!?")) > 3
-    ]
-    key_terms = []
-    for word in words:
-        if word in stopwords:
-            continue
-        if word not in key_terms:
-            key_terms.append(word)
-        if len(key_terms) >= 5:
-            break
-
-    return steps, learn, key_terms
-
-
-def _ensure_guidance(phases, learning_style):
-    if not learning_style:
-        return phases
-    for phase in phases:
-        for task in phase.get("tasks", []):
-            steps, learn, key_terms = _default_guidance_for_task(task.get("description"), learning_style)
-            if not task.get("steps"):
-                task["steps"] = steps
-            if not task.get("learn"):
-                task["learn"] = learn
-            if not task.get("key_terms"):
-                task["key_terms"] = key_terms
-    return phases
-
-
 @login_required
 def recommendations_view(request):
     profile = UserProfile.objects.filter(user=request.user).first()
@@ -574,13 +361,16 @@ def recommendations_view(request):
         premium_request_pending = PremiumRequest.objects.filter(user=request.user, status="pending").exists()
         is_premium = is_premium_user
         reco_limit = 6 if is_premium else 3
-        today = date.today().isoformat()
-        last_day = request.session.get("reco_day")
-        if last_day != today:
-            request.session["reco_day"] = today
-            request.session["reco_count"] = 0
 
-        if not is_premium and request.session.get("reco_count", 0) >= reco_limit:
+        usage_record = None
+        if not is_premium:
+            usage_record, _ = DailyRecommendationUsage.objects.get_or_create(
+                user=request.user,
+                usage_date=timezone.localdate(),
+                defaults={"count": 0},
+            )
+
+        if not is_premium and usage_record and usage_record.count >= reco_limit:
             reco_limited = True
             recommendations = request.session.get("recommendations", [])[:reco_limit]
             remaining = 0
@@ -602,9 +392,10 @@ def recommendations_view(request):
         recommendations = recommend_projects_for_profile(profile, limit=reco_limit, user_plan_tier=user_plan_tier)
 
         request.session["recommendations"] = recommendations
-        if not is_premium:
-            request.session["reco_count"] = request.session.get("reco_count", 0) + 1
-            remaining = max(reco_limit - request.session.get("reco_count", 0), 0)
+        if not is_premium and usage_record:
+            usage_record.count += 1
+            usage_record.save(update_fields=["count"])
+            remaining = max(reco_limit - usage_record.count, 0)
 
     return render(
         request,
@@ -635,8 +426,6 @@ def start_recommendation_view(request, index):
     workspace = _build_workspace_payload(project_record, project)
     is_premium_user = _is_premium(request.user)
     profile = UserProfile.objects.filter(user=request.user).first()
-    learning_style = _normalize_learning_style(profile.learning_style) if profile else ""
-    show_guidance = bool(learning_style and is_premium_user)
     project_id = f"rec-{index}"
     my_projects = request.session.get("my_projects", {})
     if profile and not _is_premium(request.user) and project_id not in my_projects:
@@ -659,17 +448,13 @@ def start_recommendation_view(request, index):
 
     if request.GET.get("regen") == "1" or phases_key not in request.session:
         request.session.pop(progress_key, None)
-        phases = _build_phases_from_tasks(project, workspace.get("task_items", []), learning_style)
+        phases = _build_phases_from_tasks(project, workspace.get("task_items", []))
         if phases:
             request.session[phases_key] = phases
         else:
             phases = []
     else:
         phases = request.session.get(phases_key, [])
-
-    if show_guidance and phases:
-        phases = _ensure_guidance(phases, learning_style)
-        request.session[phases_key] = phases
 
     completed = set(request.session.get(progress_key, []))
     if request.method == "POST":
@@ -722,7 +507,6 @@ def start_recommendation_view(request, index):
             "total_tasks": total_tasks,
             "ai_error": ai_error,
             "ai_error_detail": ai_error_detail,
-            "show_guidance": show_guidance,
             "workspace": workspace,
             "is_premium_user": is_premium_user,
         },
@@ -730,24 +514,37 @@ def start_recommendation_view(request, index):
 
 
 @login_required
-def start_showcase_view(request, slug):
-    project = _get_showcase_project(slug)
-    workspace = _build_workspace_payload(None, project)
+def start_project_view(request, project_id):
+    project_record = Project.objects.filter(id=project_id).first()
+    if not project_record:
+        return redirect("projects")
+
+    if project_record.required_plan != "explorer" and not _is_premium(request.user):
+        request.session["premium_request_error"] = "This project requires a premium plan."
+        return redirect("plans")
+
+    project = {
+        "id": project_record.id,
+        "title": project_record.title,
+        "category": project_record.field,
+        "difficulty": project_record.skill_level,
+        "summary": project_record.description,
+        "stack": _split_csv_tags(project_record.tech_preference),
+    }
+    workspace = _build_workspace_payload(project_record, project)
     is_premium_user = _is_premium(request.user)
     profile = UserProfile.objects.filter(user=request.user).first()
-    learning_style = _normalize_learning_style(profile.learning_style) if profile else ""
-    show_guidance = bool(learning_style and is_premium_user)
 
-    project_id = f"showcase-{slug}"
+    saved_project_id = f"catalog-{project_record.id}"
     my_projects = request.session.get("my_projects", {})
-    if profile and not _is_premium(request.user) and project_id not in my_projects:
+    if profile and not _is_premium(request.user) and saved_project_id not in my_projects:
         if len(my_projects) >= 5:
             request.session["my_projects_error"] = "Free users can save up to 5 projects. Upgrade to premium for unlimited saves."
             return redirect("my_projects")
-    if project_id not in my_projects:
-        my_projects[project_id] = {
-            "source": "showcase",
-            "slug": slug,
+    if saved_project_id not in my_projects:
+        my_projects[saved_project_id] = {
+            "source": "catalog",
+            "project_pk": project_record.id,
             "title": project.get("title"),
             "category": project.get("category"),
             "difficulty": project.get("difficulty"),
@@ -755,22 +552,18 @@ def start_showcase_view(request, slug):
         }
         request.session["my_projects"] = my_projects
 
-    phases_key = f"phases_{project_id}"
-    progress_key = f"progress_{project_id}"
+    phases_key = f"phases_{saved_project_id}"
+    progress_key = f"progress_{saved_project_id}"
 
     if request.GET.get("regen") == "1" or phases_key not in request.session:
         request.session.pop(progress_key, None)
-        phases = _build_phases_from_tasks(project, workspace.get("task_items", []), learning_style)
+        phases = _build_phases_from_tasks(project, workspace.get("task_items", []))
         if phases:
             request.session[phases_key] = phases
         else:
             phases = []
     else:
         phases = request.session.get(phases_key, [])
-
-    if show_guidance and phases:
-        phases = _ensure_guidance(phases, learning_style)
-        request.session[phases_key] = phases
 
     completed = set(request.session.get(progress_key, []))
     if request.method == "POST":
@@ -823,7 +616,6 @@ def start_showcase_view(request, slug):
             "total_tasks": total_tasks,
             "ai_error": ai_error,
             "ai_error_detail": ai_error_detail,
-            "show_guidance": show_guidance,
             "workspace": workspace,
             "is_premium_user": is_premium_user,
         },
@@ -843,7 +635,10 @@ def my_projects_view(request):
         completed_tasks = sum(1 for phase in phases for task in phase.get("tasks", []) if task.get("id") in completed)
         progress_pct = int((completed_tasks / total_tasks) * 100) if total_tasks else 0
         if project.get("source") == "showcase":
-            start_url = reverse("start_showcase", args=[project.get("slug")])
+            # Legacy entries from old sessions now redirect to the catalog page.
+            start_url = reverse("projects")
+        elif project.get("source") == "catalog" and project.get("project_pk"):
+            start_url = reverse("start_project", args=[project.get("project_pk")])
         else:
             start_url = reverse("start_recommendation", args=[project.get("index")])
         items.append(
@@ -927,7 +722,12 @@ def signup_view(request):
 def profile_view(request):
     profile = UserProfile.objects.filter(user=request.user).first()
     premium_request = _get_latest_premium_request(request.user)
-    return render(request, "users/profile_view.html", {"profile": profile, "premium_request": premium_request})
+    saved = request.GET.get("saved") == "1"
+    return render(
+        request,
+        "users/profile_view.html",
+        {"profile": profile, "premium_request": premium_request, "saved": saved},
+    )
 
 
 @login_required
@@ -942,7 +742,7 @@ def profile_create_or_update(request):
             user_profile = profile_form.save(commit=False)
             user_profile.user = request.user
             user_profile.save()
-            return redirect("profile_view")
+            return redirect(f"{reverse('profile_view')}?saved=1")
     else:
         account_form = UserAccountForm(instance=request.user)
         profile_form = UserProfileForm(instance=profile)

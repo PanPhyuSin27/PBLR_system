@@ -211,6 +211,75 @@
         .profile-dropdown form {
             margin: 0;
         }
+        .site-footer {
+            margin-top: 22px;
+            background: #e7ebf1;
+            border-top: 1px solid #d3dae6;
+            padding: 0;
+            color: #0f172a;
+        }
+        [data-theme="dark"] .site-footer {
+            background: #151b25;
+            border-top-color: #2a3342;
+            color: #e8edf8;
+        }
+        .footer-top {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 0;
+            border-bottom: 1px solid #cfd7e4;
+        }
+        [data-theme="dark"] .footer-top {
+            border-bottom-color: #2a3342;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 24px;
+            padding: 28px 0;
+        }
+        .footer-col h4 {
+            margin: 0 0 10px;
+            font-family: "Manrope", sans-serif;
+            font-size: 18px;
+            color: inherit;
+        }
+        .footer-col a {
+            display: block;
+            margin: 0 0 8px;
+            color: #1f2a3a;
+            font-size: 14px;
+            line-height: 1.45;
+        }
+        [data-theme="dark"] .footer-col a {
+            color: #c6d0e0;
+        }
+        .footer-col a:hover {
+            color: #1458c0;
+        }
+        .footer-brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 0;
+            font-family: "Space Grotesk", sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+        }
+        .footer-bottom {
+            padding: 0 0 16px;
+            font-size: 13px;
+            color: #5b6678;
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        [data-theme="dark"] .footer-bottom {
+            color: #93a0b5;
+        }
         .nav-login {
             border: 1px solid var(--stroke);
             padding: 8px 16px;
@@ -350,6 +419,9 @@
             .nav-links {
                 flex-wrap: wrap;
                 justify-content: center;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -499,8 +571,9 @@
             <div class="nav-right">
                 <div class="nav-links">
                     <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'project_library' %}">Project Library</a>
+                    <a href="{% url 'resources' %}">Resources</a>
                     <a href="{% url 'home' %}#plans">Plans</a>
-                    <a href="{% url 'signup' %}">Get started</a>
                 </div>
                 {% if user.is_authenticated %}
                     <div class="profile-menu" data-profile-menu>
@@ -536,284 +609,93 @@
 
         <section class="section-block">
             <h1>All Projects</h1>
-            <p class="section-sub">Explore every sample project across categories. Click a project to view details and sign up.</p>
+            {% if is_explorer_view %}
+                <p class="section-sub">Showing {{ project_count }} Explorer project{{ project_count|pluralize }} available on your current plan.</p>
+            {% else %}
+                <p class="section-sub">Showing {{ project_count }} project{{ project_count|pluralize }} from the admin catalog (Explorer + Premium).</p>
+            {% endif %}
+            {% if search_query %}
+                <p class="section-sub">Search results for "{{ search_query }}".</p>
+            {% endif %}
 
-            <div class="category-group">
-                <h3 class="category-title">AI Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Resume Matcher</h4>
-                        <p>Score resumes against job descriptions using embeddings.</p>
-                        <div class="tags">
-                            <span class="tag">NLP</span>
-                            <span class="tag">Vector Search</span>
-                            <span class="tag">Python</span>
+            {% if project_groups %}
+                {% for group in project_groups %}
+                    <div class="category-group">
+                        <h3 class="category-title">{{ group.name }}</h3>
+                        <div class="grid">
+                            {% for project in group.projects %}
+                                <div class="card">
+                                    <h4>{{ project.title }}</h4>
+                                    <p>{{ project.summary }}</p>
+                                    <div class="tags">
+                                        <span class="tag">{{ project.difficulty }}</span>
+                                        <span class="tag">{{ project.plan }}</span>
+                                        {% for tag in project.tags %}
+                                            <span class="tag">{{ tag }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    <a class="card-link" href="{% url 'start_project' project.id %}">Start project</a>
+                                </div>
+                            {% endfor %}
                         </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'resume-matcher' %}">Start project</a>
                     </div>
-                    <div class="card">
-                        <h4>Customer Support Copilot</h4>
-                        <p>Summarize tickets and suggest responses with LLMs.</p>
-                        <div class="tags">
-                            <span class="tag">LLM</span>
-                            <span class="tag">RAG</span>
-                            <span class="tag">Workflow</span>
+                {% endfor %}
+            {% else %}
+                <div class="category-group">
+                    <h3 class="category-title">No Projects Found</h3>
+                    <div class="grid">
+                        <div class="card">
+                            <h4>No matching projects</h4>
+                            <p>Try a different keyword or add new projects from the admin panel.</p>
+                            <a class="card-link" href="{% url 'projects' %}">Reset search</a>
                         </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'customer-support-copilot' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Visual Quality Inspector</h4>
-                        <p>Detect product defects using image classification.</p>
-                        <div class="tags">
-                            <span class="tag">Computer Vision</span>
-                            <span class="tag">CNN</span>
-                            <span class="tag">MLOps</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'visual-quality-inspector' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Smart Meeting Notes</h4>
-                        <p>Transcribe and extract action items automatically.</p>
-                        <div class="tags">
-                            <span class="tag">ASR</span>
-                            <span class="tag">Summarization</span>
-                            <span class="tag">Productivity</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'smart-meeting-notes' %}">Start project</a>
                     </div>
                 </div>
-            </div>
-
-            <div class="category-group">
-                <h3 class="category-title">Data Science Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Sales Insight Dashboard</h4>
-                        <p>Analyze revenue, cohorts, and growth trends with visuals.</p>
-                        <div class="tags">
-                            <span class="tag">Pandas</span>
-                            <span class="tag">BI</span>
-                            <span class="tag">Metrics</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'sales-insight-dashboard' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Customer Churn Model</h4>
-                        <p>Predict churn risk and highlight retention levers.</p>
-                        <div class="tags">
-                            <span class="tag">Classification</span>
-                            <span class="tag">Feature Eng</span>
-                            <span class="tag">Python</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'customer-churn-model' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Price Elasticity Study</h4>
-                        <p>Measure demand sensitivity using regression models.</p>
-                        <div class="tags">
-                            <span class="tag">Regression</span>
-                            <span class="tag">Econometrics</span>
-                            <span class="tag">Forecasting</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'price-elasticity-study' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>A/B Test Analyzer</h4>
-                        <p>Automate experiment results and significance checks.</p>
-                        <div class="tags">
-                            <span class="tag">Stats</span>
-                            <span class="tag">Experimentation</span>
-                            <span class="tag">Reporting</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'ab-test-analyzer' %}">Start project</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="category-group">
-                <h3 class="category-title">Web Development Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Job Board API</h4>
-                        <p>Create a REST API with auth, filtering, and role-based access.</p>
-                        <div class="tags">
-                            <span class="tag">Django</span>
-                            <span class="tag">REST</span>
-                            <span class="tag">JWT</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'job-board-api' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Portfolio Builder</h4>
-                        <p>Design a responsive site builder with templates and previews.</p>
-                        <div class="tags">
-                            <span class="tag">React</span>
-                            <span class="tag">UI</span>
-                            <span class="tag">Responsive</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'portfolio-builder' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Freelance CRM</h4>
-                        <p>Manage clients, invoices, and email workflows.</p>
-                        <div class="tags">
-                            <span class="tag">PostgreSQL</span>
-                            <span class="tag">Email</span>
-                            <span class="tag">SaaS</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'freelance-crm' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Event Booking Platform</h4>
-                        <p>Handle listings, ticketing, and secure checkout flows.</p>
-                        <div class="tags">
-                            <span class="tag">Stripe</span>
-                            <span class="tag">Payments</span>
-                            <span class="tag">UX</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'event-booking-platform' %}">Start project</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="category-group">
-                <h3 class="category-title">Mobile Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Habit Coach App</h4>
-                        <p>Build streaks, reminders, and progress charts on mobile.</p>
-                        <div class="tags">
-                            <span class="tag">Flutter</span>
-                            <span class="tag">Charts</span>
-                            <span class="tag">Notifications</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'habit-coach-app' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Campus Navigator</h4>
-                        <p>Interactive maps with routing and accessibility layers.</p>
-                        <div class="tags">
-                            <span class="tag">Maps</span>
-                            <span class="tag">Geolocation</span>
-                            <span class="tag">UX</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'campus-navigator' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Meal Planner</h4>
-                        <p>Plan weekly meals, track macros, and auto-generate lists.</p>
-                        <div class="tags">
-                            <span class="tag">Health</span>
-                            <span class="tag">Offline</span>
-                            <span class="tag">Sync</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'meal-planner' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Expense Tracker</h4>
-                        <p>Scan receipts and categorize spending on-device.</p>
-                        <div class="tags">
-                            <span class="tag">OCR</span>
-                            <span class="tag">FinTech</span>
-                            <span class="tag">Insights</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'expense-tracker' %}">Start project</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="category-group">
-                <h3 class="category-title">Cloud & DevOps Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Serverless Image API</h4>
-                        <p>Resize and optimize images with on-demand functions.</p>
-                        <div class="tags">
-                            <span class="tag">AWS</span>
-                            <span class="tag">Lambda</span>
-                            <span class="tag">S3</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'serverless-image-api' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>CI/CD Control Center</h4>
-                        <p>Monitor pipelines, deployments, and alerts.</p>
-                        <div class="tags">
-                            <span class="tag">Docker</span>
-                            <span class="tag">CI</span>
-                            <span class="tag">Observability</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'cicd-control-center' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Infra Cost Optimizer</h4>
-                        <p>Track cloud spend and flag underused services.</p>
-                        <div class="tags">
-                            <span class="tag">FinOps</span>
-                            <span class="tag">Dashboards</span>
-                            <span class="tag">Alerts</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'infra-cost-optimizer' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Observability Starter Kit</h4>
-                        <p>Set up logs, traces, and SLO dashboards quickly.</p>
-                        <div class="tags">
-                            <span class="tag">OpenTelemetry</span>
-                            <span class="tag">SLO</span>
-                            <span class="tag">Grafana</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'observability-starter-kit' %}">Start project</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="category-group">
-                <h3 class="category-title">Cybersecurity Projects</h3>
-                <div class="grid">
-                    <div class="card">
-                        <h4>Phishing Detection</h4>
-                        <p>Detect suspicious URLs with ML features and heuristics.</p>
-                        <div class="tags">
-                            <span class="tag">Security</span>
-                            <span class="tag">ML</span>
-                            <span class="tag">Python</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'phishing-detection' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Password Health Scanner</h4>
-                        <p>Audit password strength and policy compliance.</p>
-                        <div class="tags">
-                            <span class="tag">Policies</span>
-                            <span class="tag">Risk</span>
-                            <span class="tag">CLI</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'password-health-scanner' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Threat Log Explorer</h4>
-                        <p>Search security logs and flag anomalies.</p>
-                        <div class="tags">
-                            <span class="tag">SIEM</span>
-                            <span class="tag">Detection</span>
-                            <span class="tag">Analytics</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'threat-log-explorer' %}">Start project</a>
-                    </div>
-                    <div class="card">
-                        <h4>Secure File Vault</h4>
-                        <p>Encrypt files with key management and access auditing.</p>
-                        <div class="tags">
-                            <span class="tag">Encryption</span>
-                            <span class="tag">IAM</span>
-                            <span class="tag">Compliance</span>
-                        </div>
-                        <a class="card-link" href="{% url 'start_showcase' 'secure-file-vault' %}">Start project</a>
-                    </div>
-                </div>
-            </div>
+            {% endif %}
         </section>
+
+        <footer class="site-footer">
+            <div class="footer-top">
+                <div class="footer-brand">
+                    <span class="brand-badge">RM</span>
+                    <span>RecoMagic</span>
+                </div>
+            </div>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>Platform</h4>
+                    <a href="{% url 'home' %}">Home</a>
+                    <a href="{% url 'project_library' %}">Project Library</a>
+                    <a href="{% url 'resources' %}">Resources</a>
+                    <a href="{% url 'home' %}#plans">Plans</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Learning</h4>
+                    <a href="{% url 'recommendations' %}">Recommendations</a>
+                    <a href="{% url 'projects' %}">All Projects</a>
+                    <a href="{% url 'my_projects' %}">My Projects</a>
+                    <a href="{% url 'project_library' %}">Learning Tracks</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Account</h4>
+                    <a href="{% url 'profile_view' %}">View Profile</a>
+                    <a href="{% url 'profile_edit' %}">Edit Profile</a>
+                    <a href="{% url 'login' %}">Log In</a>
+                    <a href="{% url 'signup' %}">Sign Up</a>
+                </div>
+                <div class="footer-col">
+                    <h4>Support</h4>
+                    <a href="{% url 'resources' %}">Learning Resources</a>
+                    <a href="{% url 'project_library' %}">Project Guide</a>
+                    <a href="{% url 'home' %}#plans">Subscription Help</a>
+                    <a href="{% url 'home' %}">FAQ</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <span>© RecoMagic 2026</span>
+                <span>Built with Django and project-based learning.</span>
+            </div>
+        </footer>
     </div>
     <div class="auth-overlay" data-auth-overlay aria-hidden="true">
         <div class="auth-modal" role="dialog" aria-modal="true" aria-label="Authentication">

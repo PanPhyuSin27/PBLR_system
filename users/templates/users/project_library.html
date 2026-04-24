@@ -1,0 +1,246 @@
+{% extends "users/base.html" %}
+
+{% block title %}Project Library{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .library-hero {
+        border: 1px solid var(--stroke);
+        border-radius: 18px;
+        padding: 22px;
+        background: linear-gradient(140deg, rgba(255, 255, 255, 0.96), rgba(255, 244, 237, 0.9));
+        box-shadow: 0 14px 28px rgba(15, 23, 42, 0.1);
+    }
+    [data-theme="dark"] .library-hero {
+        background: linear-gradient(140deg, rgba(20, 24, 28, 0.92), rgba(20, 24, 28, 0.82));
+    }
+    .library-hero-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .library-overview {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .overview-pill {
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 10px 12px;
+        background: rgba(255, 255, 255, 0.65);
+    }
+    [data-theme="dark"] .overview-pill {
+        background: rgba(20, 24, 28, 0.65);
+    }
+    .overview-pill strong {
+        display: block;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 18px;
+    }
+    .overview-pill span {
+        color: var(--muted);
+        font-size: 12px;
+    }
+    .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    .hero-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        padding: 9px 14px;
+        font-weight: 700;
+        border: 1px solid var(--stroke);
+    }
+    .hero-btn-primary {
+        border: 0;
+        background: linear-gradient(135deg, #ff8a5b, #ff5b2e);
+        color: #fff;
+    }
+    .hero-btn-secondary {
+        background: var(--surface);
+        color: var(--ink);
+    }
+    .track-grid {
+        margin-top: 14px;
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+    }
+    .track-card {
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.75);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+    [data-theme="dark"] .track-card {
+        background: rgba(20, 24, 28, 0.75);
+    }
+    .track-card:hover {
+        transform: translateY(-2px);
+        border-color: #ff8a5b;
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
+    }
+    .track-card small {
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        font-size: 11px;
+    }
+    .track-card h3 {
+        margin: 6px 0 6px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 16px;
+        line-height: 1.25;
+    }
+    .track-card p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    .track-card a {
+        margin-top: 8px;
+        display: inline-flex;
+        font-weight: 700;
+        color: #ff5b2e;
+    }
+    .library-grid {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .library-card {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        padding: 14px;
+        background: var(--surface);
+    }
+    .library-card span {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    .library-card h3 {
+        margin: 8px 0 8px;
+        font-size: 18px;
+        font-family: "Space Grotesk", sans-serif;
+    }
+    .library-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+    }
+    .library-card a {
+        margin-top: 12px;
+        display: inline-flex;
+        font-weight: 700;
+        color: #ff5b2e;
+    }
+    @media (max-width: 900px) {
+        .library-overview {
+            grid-template-columns: 1fr;
+        }
+        .track-grid {
+            grid-template-columns: 1fr;
+        }
+        .library-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Project Library</h1>
+{% if is_explorer_view %}
+<p class="page-sub">Browse projects by domain. You are seeing up to {{ per_category_limit }} Explorer projects per category.</p>
+{% else %}
+<p class="page-sub">Browse projects by domain. You are seeing up to {{ per_category_limit }} projects per category.</p>
+{% endif %}
+
+<section class="library-hero">
+    <div class="library-hero-head">
+        <h2 style="margin: 0; font-family: 'Space Grotesk', sans-serif;">Build from curated tracks, not random picks</h2>
+        <div class="hero-actions">
+            {% if user.is_authenticated %}
+                <a class="hero-btn hero-btn-primary" href="{% url 'my_projects' %}">Continue Learning</a>
+                <a class="hero-btn hero-btn-secondary" href="{% url 'recommendations' %}">Recommendations</a>
+            {% else %}
+                <a class="hero-btn hero-btn-primary" href="{% url 'signup' %}">Create Account</a>
+                <a class="hero-btn hero-btn-secondary" href="{% url 'login' %}">Log In</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="library-overview">
+        <div class="overview-pill">
+            <strong>{{ library_groups|length }}</strong>
+            <span>Active Categories</span>
+        </div>
+        <div class="overview-pill">
+            <strong>{{ per_category_limit }}</strong>
+            <span>Projects Per Category</span>
+        </div>
+        <div class="overview-pill">
+            {% if is_explorer_view %}
+                <strong>Explorer</strong>
+                <span>Free Track Visibility</span>
+            {% else %}
+                <strong>Premium</strong>
+                <span>Extended Track Visibility</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="track-grid">
+        {% for group in library_groups|slice:":4" %}
+            <article class="track-card">
+                <small>Featured Track</small>
+                <h3>{{ group.name }}</h3>
+                <p>{{ group.projects|length }} project{{ group.projects|length|pluralize }} available in this view.</p>
+                {% if group.projects %}
+                    <a href="{% url 'start_project' group.projects.0.id %}">Start {{ group.name }}</a>
+                {% endif %}
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+{% if library_groups %}
+    {% for group in library_groups %}
+        <section style="margin-top: 20px;">
+            <h2 style="margin: 0 0 10px; font-family: 'Space Grotesk', sans-serif;">{{ group.name }}</h2>
+            <div class="library-grid" style="margin-top: 0;">
+                {% for project in group.projects %}
+                    <article class="library-card">
+                        <span>{{ project.difficulty }} | {{ project.plan }}</span>
+                        <h3>{{ project.title }}</h3>
+                        <p>{{ project.summary|truncatewords:18 }}</p>
+                        <a href="{% url 'start_project' project.id %}">Start project</a>
+                    </article>
+                {% endfor %}
+            </div>
+        </section>
+    {% endfor %}
+{% else %}
+    <section class="library-grid">
+        <article class="library-card">
+            <span>Library</span>
+            <h3>No Projects Available</h3>
+            <p>Projects are not available for your current view yet. Please check back after new projects are added.</p>
+            <a href="{% url 'projects' %}">Go to all projects</a>
+        </article>
+    </section>
+{% endif %}
+{% endblock %}

@@ -12,14 +12,6 @@ class UserProfile(models.Model):
         ("intermediate", "Intermediate"),
         ("advanced", "Advanced"),
     ]
-    LEARNING_STYLE_CHOICES = [
-        ("step_by_step", "Step-by-step"),
-        ("hands_on", "Hands-on"),
-        ("visual_examples", "Visual + examples"),
-        ("short_lessons", "Short lessons + practice"),
-        ("guided_checklist", "Guided checklist"),
-    ]
-
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     field = models.CharField(max_length=100)
@@ -28,7 +20,6 @@ class UserProfile(models.Model):
     tech_preference = models.CharField(max_length=100)
     learning_goal = models.CharField(max_length=100)
     interest_tags = models.CharField(max_length=200, help_text="Comma separated tags")
-    learning_style = models.CharField(max_length=100, blank=True, null=True, choices=LEARNING_STYLE_CHOICES)
     profile_picture = models.FileField(upload_to="profile_pictures/", blank=True, null=True)
 
     def __str__(self):
@@ -114,6 +105,21 @@ class PremiumRequest(models.Model):
         return f"{self.user} - {self.status}"
 
 
+class DailyRecommendationUsage(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    usage_date = models.DateField(default=timezone.localdate)
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["-usage_date", "-id"]
+        constraints = [
+            models.UniqueConstraint(fields=["user", "usage_date"], name="users_unique_daily_reco_usage")
+        ]
+
+    def __str__(self):
+        return f"{self.user} - {self.usage_date} ({self.count})"
+
+
 class Project(models.Model):
     SKILL_LEVEL_CHOICES = [
         ("beginner", "Beginner"),
@@ -139,7 +145,6 @@ class Project(models.Model):
     resources = models.TextField(blank=True, help_text="Optional resources. One per line. Use 'Title | URL' or plain URL.")
     task_checklist = models.TextField(blank=True, help_text="Checklist tasks, one per line.")
     detailed_roadmap = models.TextField(blank=True)
-    github_starter_template = models.URLField(blank=True)
     premium_hints = models.TextField(blank=True, help_text="Premium hints, one per line.")
 
     class Meta:

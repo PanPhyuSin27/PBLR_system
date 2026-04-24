@@ -1,0 +1,31 @@
+TOTAL_BY_FIELD
+AI: 13
+Backend Architecture: 3
+Blockchain Development: 2
+Cloud & DevOps: 3
+Cloud Computing: 2
+Cybersecurity: 6
+Data Engineering: 2
+Data Science: 5
+Data Visualization: 2
+DevOps: 2
+Frontend Development: 2
+Full Stack Development: 3
+IoT Development: 3
+Mobile Development: 2
+Web Development: 14
+
+EXPLORER_BY_FIELD
+AI: 3
+Backend Architecture: 2
+Cloud & DevOps: 2
+Cloud Computing: 2
+Cybersecurity: 3
+Data Science: 3
+Data Visualization: 2
+DevOps: 2
+Frontend Development: 2
+Full Stack Development: 2
+IoT Development: 2
+Mobile Development: 2
+Web Development: 7

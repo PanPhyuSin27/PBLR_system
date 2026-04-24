@@ -6,10 +6,12 @@ from .forms import CustomAuthenticationForm
 urlpatterns = [
     path("", views.home_view, name="home"),
     path("plans/", views.plans_view, name="plans"),
+    path("project-library/", views.project_library_view, name="project_library"),
+    path("resources/", views.resources_view, name="resources"),
     path("projects/", views.projects_view, name="projects"),
     path("recommendations/", views.recommendations_view, name="recommendations"),
     path("recommendations/<int:index>/start/", views.start_recommendation_view, name="start_recommendation"),
-    path("showcase/<slug:slug>/start/", views.start_showcase_view, name="start_showcase"),
+    path("projects/<int:project_id>/start/", views.start_project_view, name="start_project"),
     path("my-projects/", views.my_projects_view, name="my_projects"),
     path("my-projects/<str:project_id>/remove/", views.remove_my_project_view, name="remove_my_project"),
     path("signup/", views.signup_view, name="signup"),

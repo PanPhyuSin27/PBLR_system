@@ -5,6 +5,14 @@ from .models import UserProfile
 
 
 class UserProfileForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["field"].widget.attrs.update({"placeholder": "e.g. Data Science"})
+        self.fields["target_role"].widget.attrs.update({"placeholder": "e.g. Data Analyst"})
+        self.fields["tech_preference"].widget.attrs.update({"placeholder": "e.g. Python, SQL, Power BI"})
+        self.fields["learning_goal"].widget.attrs.update({"placeholder": "e.g. Skill Improvement"})
+        self.fields["interest_tags"].widget.attrs.update({"placeholder": "e.g. E-commerce, Finance, Healthcare"})
+
     class Meta:
         model = UserProfile
         fields = [

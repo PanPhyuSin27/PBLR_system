@@ -41,7 +41,6 @@ class ProjectAdmin(admin.ModelAdmin):
 				"resources",
 				"task_checklist",
 				"detailed_roadmap",
-				"github_starter_template",
 				"premium_hints",
 			)
 		}),

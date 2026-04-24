@@ -1,0 +1,482 @@
+{% extends "users/base.html" %}
+
+{% block title %}Resources{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .resource-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .resource-card {
+        border: 1px solid var(--stroke);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--surface);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        display: flex;
+        flex-direction: column;
+    }
+    .resource-media {
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        position: relative;
+    }
+    .resource-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .resource-media span {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        background: rgba(15, 23, 42, 0.78);
+        color: #fff;
+        font-size: 12px;
+        border-radius: 999px;
+        padding: 4px 8px;
+    }
+    .resource-body {
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+    }
+    .resource-role {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    .resource-body h3 {
+        margin: 0;
+        font-size: 18px;
+        font-family: "Space Grotesk", sans-serif;
+    }
+    .resource-body p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.5;
+    }
+    .resource-body a {
+        display: inline-flex;
+        width: fit-content;
+        font-weight: 700;
+        color: #ff5b2e;
+    }
+    @media (max-width: 1200px) {
+        .resource-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 960px) {
+        .resource-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+    @media (max-width: 640px) {
+        .resource-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Resources</h1>
+<p class="page-sub">Curated links and role-based starter kits to accelerate your project journey.</p>
+
+<section class="resource-grid">
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1518773553398-650c184e0bb3?auto=format&fit=crop&w=900&q=80" alt="Frontend development" loading="lazy" />
+            <span>Frontend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Frontend Developer</div>
+            <h3>HTML, CSS, React</h3>
+            <p>Build strong UI foundations and modern component workflows.</p>
+            <a href="https://developer.mozilla.org/en-US/docs/Learn" target="_blank" rel="noreferrer">Start learning</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=900&q=80" alt="React development" loading="lazy" />
+            <span>Frontend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Frontend Engineer</div>
+            <h3>React Official Docs</h3>
+            <p>Modern React patterns, hooks, routing, and best practices.</p>
+            <a href="https://react.dev/learn" target="_blank" rel="noreferrer">Learn React</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?auto=format&fit=crop&w=900&q=80" alt="Vue development" loading="lazy" />
+            <span>Frontend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Frontend Engineer</div>
+            <h3>Vue.js Guide</h3>
+            <p>Build reactive interfaces quickly with the Vue ecosystem.</p>
+            <a href="https://vuejs.org/guide/introduction.html" target="_blank" rel="noreferrer">Explore Vue</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=900&q=80" alt="Node.js backend" loading="lazy" />
+            <span>Backend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Backend Developer</div>
+            <h3>Node.js Docs</h3>
+            <p>Core backend APIs, runtime fundamentals, and HTTP patterns.</p>
+            <a href="https://nodejs.org/en/docs" target="_blank" rel="noreferrer">Read Node docs</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=900&q=80" alt="Backend development" loading="lazy" />
+            <span>Backend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Backend Developer</div>
+            <h3>Django + APIs</h3>
+            <p>Learn practical API patterns and production-ready backend structure.</p>
+            <a href="https://docs.djangoproject.com/" target="_blank" rel="noreferrer">Explore Django</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80" alt="FastAPI backend" loading="lazy" />
+            <span>Backend</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">API Developer</div>
+            <h3>FastAPI Docs</h3>
+            <p>Create high-performance Python APIs with validation and OpenAPI.</p>
+            <a href="https://fastapi.tiangolo.com/" target="_blank" rel="noreferrer">Build with FastAPI</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=900&q=80" alt="System design" loading="lazy" />
+            <span>Architecture</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Software Engineer</div>
+            <h3>System Design Primer</h3>
+            <p>Popular open-source guide for scalable architecture concepts.</p>
+            <a href="https://github.com/donnemartin/system-design-primer" target="_blank" rel="noreferrer">Study system design</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=900&q=80" alt="Data analytics" loading="lazy" />
+            <span>Analytics</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Data Analyst</div>
+            <h3>SQL + BI Basics</h3>
+            <p>Practice analysis, dashboards, and decision-ready storytelling.</p>
+            <a href="https://mode.com/sql-tutorial/" target="_blank" rel="noreferrer">SQL starter</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1518186233392-c232efbf2373?auto=format&fit=crop&w=900&q=80" alt="SQL practice" loading="lazy" />
+            <span>Analytics</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Data Analyst</div>
+            <h3>SQLBolt Interactive SQL</h3>
+            <p>Hands-on SQL lessons for joins, grouping, and query logic.</p>
+            <a href="https://sqlbolt.com/" target="_blank" rel="noreferrer">Practice SQL</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=900&q=80" alt="Tableau dashboards" loading="lazy" />
+            <span>Visualization</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">BI Developer</div>
+            <h3>Tableau Learning</h3>
+            <p>Popular dashboarding platform with guided visual analytics paths.</p>
+            <a href="https://www.tableau.com/learn/training" target="_blank" rel="noreferrer">Learn Tableau</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80" alt="Data science" loading="lazy" />
+            <span>Data Science</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Data Scientist</div>
+            <h3>Python + ML Workflow</h3>
+            <p>Move from data prep to modeling with practical ML examples.</p>
+            <a href="https://scikit-learn.org/stable/tutorial/basic/tutorial.html" target="_blank" rel="noreferrer">ML basics</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=900&q=80" alt="Pandas data analysis" loading="lazy" />
+            <span>Data Science</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Data Scientist</div>
+            <h3>Pandas Documentation</h3>
+            <p>Industry-standard toolkit for data cleaning and transformation.</p>
+            <a href="https://pandas.pydata.org/docs/" target="_blank" rel="noreferrer">Master Pandas</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=900&q=80" alt="Kaggle competitions" loading="lazy" />
+            <span>Data Science</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">ML Practitioner</div>
+            <h3>Kaggle Learn</h3>
+            <p>Popular practical platform with notebooks, datasets, and challenges.</p>
+            <a href="https://www.kaggle.com/learn" target="_blank" rel="noreferrer">Train on Kaggle</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=900&q=80" alt="TensorFlow machine learning" loading="lazy" />
+            <span>AI/ML</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">ML Engineer</div>
+            <h3>TensorFlow Tutorials</h3>
+            <p>Popular deep learning library with end-to-end model tutorials.</p>
+            <a href="https://www.tensorflow.org/tutorials" target="_blank" rel="noreferrer">Learn TensorFlow</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1516321497487-e288fb19713f?auto=format&fit=crop&w=900&q=80" alt="PyTorch deep learning" loading="lazy" />
+            <span>AI/ML</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">ML Engineer</div>
+            <h3>PyTorch Tutorials</h3>
+            <p>Widely used framework for research and production ML workflows.</p>
+            <a href="https://pytorch.org/tutorials/" target="_blank" rel="noreferrer">Learn PyTorch</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=900&q=80" alt="Cloud and DevOps" loading="lazy" />
+            <span>Cloud</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Cloud / DevOps</div>
+            <h3>AWS + CI/CD</h3>
+            <p>Build reliable deployment flows and observability habits.</p>
+            <a href="https://aws.amazon.com/getting-started/" target="_blank" rel="noreferrer">Cloud start</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=900&q=80" alt="Microsoft Azure cloud" loading="lazy" />
+            <span>Cloud</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Cloud Engineer</div>
+            <h3>Microsoft Learn Azure</h3>
+            <p>Structured, popular learning paths for Azure fundamentals to advanced.</p>
+            <a href="https://learn.microsoft.com/azure/" target="_blank" rel="noreferrer">Learn Azure</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=900&q=80" alt="Google cloud platform" loading="lazy" />
+            <span>Cloud</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Cloud Engineer</div>
+            <h3>Google Cloud Training</h3>
+            <p>Popular GCP tracks for infrastructure, data, and ML workloads.</p>
+            <a href="https://cloud.google.com/training" target="_blank" rel="noreferrer">Explore GCP</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1605745341112-85968b19335b?auto=format&fit=crop&w=900&q=80" alt="Docker containers" loading="lazy" />
+            <span>DevOps</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">DevOps Engineer</div>
+            <h3>Docker Docs</h3>
+            <p>Container fundamentals, images, Compose, and production practices.</p>
+            <a href="https://docs.docker.com/" target="_blank" rel="noreferrer">Use Docker</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=900&q=80" alt="Kubernetes orchestration" loading="lazy" />
+            <span>DevOps</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Platform Engineer</div>
+            <h3>Kubernetes Docs</h3>
+            <p>Deploy and scale containerized apps with Kubernetes best practices.</p>
+            <a href="https://kubernetes.io/docs/home/" target="_blank" rel="noreferrer">Learn Kubernetes</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=900&q=80" alt="Terraform infrastructure as code" loading="lazy" />
+            <span>DevOps</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Cloud Engineer</div>
+            <h3>Terraform Learn</h3>
+            <p>Provision cloud infrastructure with popular IaC workflows.</p>
+            <a href="https://developer.hashicorp.com/terraform/tutorials" target="_blank" rel="noreferrer">Practice Terraform</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80" alt="GitHub Actions CI CD" loading="lazy" />
+            <span>DevOps</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Release Engineer</div>
+            <h3>GitHub Actions</h3>
+            <p>Automate CI/CD pipelines with one of the most popular tools.</p>
+            <a href="https://docs.github.com/actions" target="_blank" rel="noreferrer">Automate workflows</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=900&q=80" alt="Flutter mobile app development" loading="lazy" />
+            <span>Mobile</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Mobile Developer</div>
+            <h3>Flutter Docs</h3>
+            <p>Build cross-platform mobile apps with one codebase.</p>
+            <a href="https://docs.flutter.dev/" target="_blank" rel="noreferrer">Build with Flutter</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1551650975-87deedd944c3?auto=format&fit=crop&w=900&q=80" alt="React Native mobile apps" loading="lazy" />
+            <span>Mobile</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Mobile Developer</div>
+            <h3>React Native Docs</h3>
+            <p>Create native-feel mobile apps with JavaScript and React.</p>
+            <a href="https://reactnative.dev/docs/getting-started" target="_blank" rel="noreferrer">Learn React Native</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80" alt="Android development" loading="lazy" />
+            <span>Mobile</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Android Developer</div>
+            <h3>Android Developers</h3>
+            <p>Official Android guides, architecture, and app publishing flow.</p>
+            <a href="https://developer.android.com/docs" target="_blank" rel="noreferrer">Develop Android apps</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=900&q=80" alt="Cybersecurity" loading="lazy" />
+            <span>Security</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Cybersecurity</div>
+            <h3>SOC Labs</h3>
+            <p>Train your hands-on security mindset with guided labs and docs.</p>
+            <a href="https://www.kali.org/docs/" target="_blank" rel="noreferrer">Security labs</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=900&q=80" alt="OWASP web security" loading="lazy" />
+            <span>Security</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">Security Engineer</div>
+            <h3>OWASP Top 10</h3>
+            <p>Most referenced security risks and mitigation guidance.</p>
+            <a href="https://owasp.org/www-project-top-ten/" target="_blank" rel="noreferrer">Study OWASP Top 10</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1563206767-5b18f218e8de?auto=format&fit=crop&w=900&q=80" alt="TryHackMe labs" loading="lazy" />
+            <span>Security</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">SOC Analyst</div>
+            <h3>TryHackMe</h3>
+            <p>Popular hands-on security labs for practical attack and defense skills.</p>
+            <a href="https://tryhackme.com/" target="_blank" rel="noreferrer">Practice security labs</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=900&q=80" alt="Linux command line" loading="lazy" />
+            <span>Core Skills</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">All Engineers</div>
+            <h3>Linux Journey</h3>
+            <p>Friendly roadmap for Linux and shell skills used across engineering roles.</p>
+            <a href="https://linuxjourney.com/" target="_blank" rel="noreferrer">Learn Linux</a>
+        </div>
+    </article>
+
+    <article class="resource-card">
+        <div class="resource-media">
+            <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80" alt="Git and version control" loading="lazy" />
+            <span>Core Skills</span>
+        </div>
+        <div class="resource-body">
+            <div class="resource-role">All Engineers</div>
+            <h3>GitHub Skills</h3>
+            <p>Popular interactive courses for Git, pull requests, and collaboration.</p>
+            <a href="https://skills.github.com/" target="_blank" rel="noreferrer">Level up Git skills</a>
+        </div>
+    </article>
+</section>
+{% endblock %}

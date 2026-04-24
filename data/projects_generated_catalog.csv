@@ -1,0 +1,146 @@
+title,description,field,target_role,skill_level,required_plan,tech_preference,learning_goal,interest_tags,learning_objectives,resources,task_checklist,detailed_roadmap,github_starter_template,premium_hints
+"AI Resume Screener","Build an AI pipeline that parses resumes and ranks candidates against job requirements.","AI","Backend Developer","intermediate","pro_monthly","Python, FastAPI, PostgreSQL, OpenAI","Build production-ready AI matching services","ai,nlp,recruitment,backend","Design parsing schema
+Implement scoring logic
+Expose ranking API","FastAPI Docs | https://fastapi.tiangolo.com/
+spaCy Docs | https://spacy.io/usage","Create project skeleton
+Build resume parser
+Implement scoring endpoint
+Add test suite","Week 1: Data model and parser
+Week 2: Scoring algorithm
+Week 3: API hardening
+Week 4: Monitoring and optimization","https://github.com/example/ai-resume-screener","Use weighted scoring by must-have vs nice-to-have
+Cache embeddings to reduce API cost"
+"Customer Churn Predictor","Create a churn prediction workflow from historical customer activity data.","Data Science","Data Analyst","beginner","explorer","Python, Pandas, Scikit-learn","Learn end-to-end predictive modeling","classification,churn,analytics,python","Prepare clean feature table
+Train baseline classification model
+Evaluate with business metrics","Pandas Docs | https://pandas.pydata.org/docs/
+Scikit-learn Guide | https://scikit-learn.org/stable/user_guide.html","Load and clean dataset
+Engineer customer features
+Train and evaluate model
+Write insight summary","","",""
+"Cloud Cost Anomaly Monitor","Detect unusual cloud spending patterns and send alerts to teams.","Cloud & DevOps","DevOps Engineer","intermediate","pro_yearly","Python, AWS Lambda, CloudWatch, SNS","Build cost-observability automation","cloud,finops,alerts,devops","Ingest billing data
+Detect anomalies
+Trigger alert workflow","AWS Cost Explorer | https://docs.aws.amazon.com/cost-management/
+CloudWatch Docs | https://docs.aws.amazon.com/cloudwatch/","Export daily spend data
+Implement anomaly detector
+Publish alerts to SNS
+Create runbook","Sprint 1: Billing ingestion
+Sprint 2: Detection logic
+Sprint 3: Alerting and runbook
+Sprint 4: Dashboard and KPI review","https://github.com/example/cloud-cost-monitor","Tune thresholds by service category
+Add weekly trend baselines before alerting"
+"Secure Auth API","Implement secure authentication and authorization for a REST backend.","Cybersecurity","Backend Developer","intermediate","explorer","Python, Django, DRF, JWT","Ship secure auth flows in web APIs","security,authentication,jwt,backend","Design auth architecture
+Implement token lifecycle
+Add endpoint protection tests","Django Auth Docs | https://docs.djangoproject.com/en/stable/topics/auth/
+OWASP ASVS | https://owasp.org/www-project-application-security-verification-standard/","Create auth endpoints
+Add JWT refresh flow
+Protect role-based routes
+Write security tests","","",""
+"Fraud Detection Feature Store","Build reusable fraud-risk features and train a detection model.","AI","Data Analyst","advanced","pro_monthly","Python, Feature Store, XGBoost","Design reusable ML feature pipelines","fraud,mlops,features,analytics","Define fraud features
+Create offline/online parity checks
+Train and compare models","XGBoost Docs | https://xgboost.readthedocs.io/
+Feature Store Guide | https://docs.feast.dev/","Define feature contracts
+Build feature generation jobs
+Train model variants
+Track drift metrics","Phase 1: Feature ideation
+Phase 2: Data pipeline
+Phase 3: Model benchmark
+Phase 4: Drift monitoring","https://github.com/example/fraud-feature-store","Use point-in-time joins to avoid leakage
+Document feature ownership and SLA"
+"Portfolio API Platform","Develop a portfolio backend with projects, skills, and contact workflows.","Web Development","Backend Developer","beginner","explorer","Python, Django, PostgreSQL, Docker","Practice backend architecture and deployment basics","api,django,portfolio,backend","Model portfolio entities
+Build CRUD APIs
+Deploy containerized service","Django REST Framework | https://www.django-rest-framework.org/
+Docker Docs | https://docs.docker.com/","Create Django app structure
+Implement serializers and views
+Add API tests
+Deploy with Docker","","",""
+"Marketing Attribution Dashboard","Build multi-touch attribution reports for campaign performance.","Data Science","Data Analyst","intermediate","pro_monthly","SQL, Python, Power BI","Measure campaign ROI with reliable attribution","attribution,bi,sql,marketing","Build attribution logic
+Create KPI dashboard
+Explain tradeoffs in model choice","Mode SQL Tutorial | https://mode.com/sql-tutorial/
+Power BI Learn | https://learn.microsoft.com/power-bi/","Create event model in SQL
+Implement attribution query set
+Build dashboard pages
+Present recommendations","Week 1: Event schema
+Week 2: Attribution SQL
+Week 3: Dashboard build
+Week 4: Executive summary","https://github.com/example/marketing-attribution-dashboard","Compare first-touch, last-touch, and position-based models
+Track uncertainty in sparse channels"
+"SOC Incident Triage Assistant","Create a triage workflow that prioritizes high-risk security alerts.","Cybersecurity","SOC Analyst","intermediate","pro_yearly","Python, ELK, Sigma","Improve SOC triage speed and consistency","soc,siem,incident,response","Map alert severity model
+Automate enrichment steps
+Define escalation rules","Sigma Rules | https://sigmahq.io/
+Elastic Security | https://www.elastic.co/security","Parse incoming alerts
+Enrich with threat intel
+Rank and route incidents
+Measure MTTR improvements","Sprint 1: Severity matrix
+Sprint 2: Enrichment pipeline
+Sprint 3: Escalation automation
+Sprint 4: KPI tracking","https://github.com/example/soc-triage-assistant","Prioritize detections with context confidence score
+Attach analyst playbook links per alert type"
+"E-commerce Recommendation Engine","Build product recommendation APIs with collaborative filtering and fallback rules.","AI","Backend Developer","advanced","pro_yearly","Python, Redis, PostgreSQL, FastAPI","Deliver low-latency recommendation APIs","recommendation,ranking,api,ml","Implement recommendation candidates
+Add ranking and fallback rules
+Expose API for storefront","RecSys Handbook | https://www.recsyswiki.com/
+Redis Docs | https://redis.io/docs/","Create interaction data model
+Implement candidate generation
+Build ranking endpoint
+Add latency tests","Phase 1: Candidate retrieval
+Phase 2: Ranking quality
+Phase 3: API integration
+Phase 4: A/B testing","https://github.com/example/ecommerce-recommendation-engine","Use popularity fallback for cold-start users
+Track hit-rate and conversion uplift"
+"Data Quality Rule Engine","Build data quality checks and failure alerts for analytics pipelines.","Data Science","Data Analyst","beginner","explorer","Python, Great Expectations, SQL","Learn practical data quality engineering","data-quality,etl,analytics,testing","Define quality dimensions
+Implement validation suite
+Create data quality report","Great Expectations | https://docs.greatexpectations.io/
+dbt Docs | https://docs.getdbt.com/","Define validation rules
+Run checks on sample pipeline
+Alert on failures
+Document ownership","","",""
+"Containerized CI Pipeline","Set up CI checks and image builds for a backend service.","Cloud & DevOps","DevOps Engineer","beginner","explorer","Docker, GitHub Actions, Python","Automate quality gates before deployment","cicd,containers,automation,devops","Configure CI stages
+Build and publish images
+Add quality checks","GitHub Actions | https://docs.github.com/actions
+Docker Build Docs | https://docs.docker.com/build/","Create workflow YAML
+Run lint and tests
+Build container image
+Push image to registry","","",""
+"Zero Trust Access Gateway","Implement policy-based access checks for internal service communication.","Cybersecurity","Backend Developer","advanced","pro_monthly","Python, OPA, mTLS","Apply zero-trust patterns in backend systems","zero-trust,policy,security,backend","Define access policy model
+Integrate policy decision point
+Audit denied access events","Open Policy Agent | https://www.openpolicyagent.org/docs/
+NIST Zero Trust | https://www.nist.gov/publications/zero-trust-architecture","Map service identities
+Enforce mTLS trust chain
+Evaluate policy decisions
+Log and audit denials","Week 1: Identity mapping
+Week 2: Policy engine integration
+Week 3: Enforcement rollout
+Week 4: Audit and hardening","https://github.com/example/zero-trust-access-gateway","Start in monitor mode before blocking
+Version policy bundles for rollback"
+"Backend Performance Lab","Profile and optimize API latency under production-like load.","Web Development","Backend Developer","intermediate","pro_monthly","Python, Django, Locust, PostgreSQL","Improve backend performance engineering skills","performance,profiling,backend,api","Measure baseline latency
+Identify bottlenecks
+Apply tuning changes","Locust Docs | https://docs.locust.io/
+Django Performance | https://docs.djangoproject.com/en/stable/topics/performance/","Create load testing scenarios
+Collect baseline metrics
+Optimize DB queries and caching
+Validate improvements","Phase 1: Baseline load tests
+Phase 2: Bottleneck profiling
+Phase 3: Query and cache tuning
+Phase 4: Regression guardrails","https://github.com/example/backend-performance-lab","Profile before optimizing blindly
+Track p95 and p99 separately"
+"MLOps Model Registry Workflow","Create a reproducible model registry and promotion workflow.","AI","DevOps Engineer","intermediate","pro_yearly","Python, MLflow, Docker, GitHub Actions","Operationalize model lifecycle management","mlops,registry,automation,devops","Register model versions
+Define promotion criteria
+Automate release pipeline","MLflow Docs | https://mlflow.org/docs/latest/
+GitHub Actions | https://docs.github.com/actions","Train and log model artifacts
+Register and version models
+Promote based on evaluation
+Deploy selected model","Sprint 1: Tracking setup
+Sprint 2: Registry and governance
+Sprint 3: Promotion automation
+Sprint 4: Deployment pipeline","https://github.com/example/mlops-model-registry-workflow","Enforce approval gates for production promotion
+Store evaluation reports with each version"
+"Payments Reconciliation API","Build a reconciliation service that matches payment gateway and ledger records.","Web Development","Backend Developer","advanced","pro_yearly","Python, Django, Celery, PostgreSQL","Design resilient financial backend workflows","payments,reconciliation,backend,queues","Define reconciliation states
+Implement matching algorithm
+Handle retry and exception flows","Celery Docs | https://docs.celeryq.dev/
+PostgreSQL Docs | https://www.postgresql.org/docs/","Create transaction models
+Build reconciliation worker
+Add discrepancy reporting
+Write idempotency tests","Week 1: Domain model
+Week 2: Matching engine
+Week 3: Async processing
+Week 4: Reporting and controls","https://github.com/example/payments-reconciliation-api","Use deterministic matching rules first
+Add human-review queue for unresolved mismatches"

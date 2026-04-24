@@ -282,20 +282,6 @@
 
     [data-theme="dark"] .support-link { background: rgba(20, 24, 28, .9); }
 
-    .repo-card {
-        border: 1px solid var(--stroke);
-        border-radius: 12px;
-        padding: 12px;
-        margin-top: 10px;
-        background: rgba(255, 255, 255, .75);
-        display: grid;
-        gap: 9px;
-    }
-
-    [data-theme="dark"] .repo-card { background: rgba(20, 24, 28, .9); }
-    .repo-url { font-size: 12px; color: var(--muted); word-break: break-all; }
-    .repo-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
     .premium-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 
     .lock-pill {
@@ -518,21 +504,6 @@
             </article>
 
             <article class="ws-card fade-item">
-                <h3 class="ws-title">💻 GitHub Starter Template</h3>
-                <div class="repo-card">
-                    {% if workspace.github_starter_template %}
-                        <div class="repo-url" data-repo-url>{{ workspace.github_starter_template }}</div>
-                        <div class="repo-actions">
-                            <a class="btn btn-primary" href="{{ workspace.github_starter_template }}" target="_blank" rel="noreferrer">Clone Starter Repo</a>
-                            <button class="btn" type="button" data-copy-repo>Copy URL</button>
-                        </div>
-                    {% else %}
-                        <p class="ws-sub">No repository link added yet.</p>
-                    {% endif %}
-                </div>
-            </article>
-
-            <article class="ws-card fade-item">
                 <div class="premium-header">
                     <h3 class="ws-title">🔐 Premium Hints</h3>
                     {% if is_premium_user %}
@@ -583,8 +554,6 @@
     const progressPercent = document.querySelector("[data-progress-percent]");
     const progressCount = document.querySelector("[data-progress-count]");
     const progressMessage = document.querySelector("[data-progress-message]");
-    const copyButton = document.querySelector("[data-copy-repo]");
-    const repoUrlElement = document.querySelector("[data-repo-url]");
 
     const setChipState = (chip, state) => {
         if (!chip) return;
@@ -679,28 +648,6 @@
             if (item) item.classList.toggle("open");
         });
     });
-
-    if (copyButton && repoUrlElement) {
-        copyButton.addEventListener("click", async () => {
-            const url = (repoUrlElement.textContent || "").trim();
-            if (!url) return;
-
-            try {
-                await navigator.clipboard.writeText(url);
-                const original = copyButton.textContent;
-                copyButton.textContent = "Copied";
-                setTimeout(() => { copyButton.textContent = original; }, 1200);
-            } catch (error) {
-                const range = document.createRange();
-                range.selectNodeContents(repoUrlElement);
-                const selection = window.getSelection();
-                if (selection) {
-                    selection.removeAllRanges();
-                    selection.addRange(range);
-                }
-            }
-        });
-    }
 
     if (progressFill) {
         const target = Number(progressFill.getAttribute("data-target") || 0);

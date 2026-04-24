@@ -1,0 +1,50 @@
+title,description,field,target_role,skill_level,required_plan,tech_preference,learning_goal,interest_tags,learning_objectives,resources,task_checklist,detailed_roadmap,github_starter_template,premium_hints
+"Cloud Reliability Runbook Builder","Create automated reliability runbooks and alert-driven remediation workflows.","Cloud & DevOps","DevOps Engineer","intermediate","explorer","Python, Terraform, AWS","Improve cloud reliability operations","cloud,reliability,runbooks,devops","Design runbook templates
+Automate remediation steps
+Track incident outcomes","AWS Well-Architected | https://aws.amazon.com/architecture/well-architected/
+Terraform Docs | https://developer.hashicorp.com/terraform/docs","Define reliability SLOs
+Create runbook scripts
+Wire alerts to actions
+Document postmortem template","","",""
+"Cloud Architecture Portfolio","Build a deployable cloud reference architecture with cost and security considerations.","Cloud Computing","Cloud Engineer","beginner","explorer","AWS, Terraform, Docker","Learn practical cloud architecture design","cloud,architecture,terraform,portfolio","Model cloud architecture components
+Implement infrastructure as code
+Validate architecture tradeoffs","AWS Architecture Center | https://aws.amazon.com/architecture/
+Terraform Docs | https://developer.hashicorp.com/terraform/docs","Create architecture diagram
+Provision core services
+Add monitoring and logs
+Publish architecture notes","","",""
+"Executive BI Storyboard","Transform raw KPIs into executive-friendly narrative dashboards.","Data Visualization","Data Analyst","beginner","explorer","Power BI, SQL, Python","Build stronger dashboard storytelling skills","dashboard,storytelling,bi,kpi","Define narrative dashboard flow
+Create clear KPI visuals
+Write insight-driven summaries","Power BI Learn | https://learn.microsoft.com/power-bi/
+Data Viz Catalogue | https://datavizcatalogue.com/","Prepare KPI dataset
+Build storyboard pages
+Refine chart readability
+Present recommendations","","",""
+"Monolith to Microservices Blueprint","Design and prototype a migration path from monolith to service-oriented architecture.","Full Stack Development","Full Stack Developer","intermediate","explorer","Node.js, React, PostgreSQL, Docker","Understand practical full-stack architecture migration","fullstack,microservices,architecture,web","Assess monolith boundaries
+Design service contracts
+Build migration prototype","Microservices Patterns | https://microservices.io/
+Docker Docs | https://docs.docker.com/","Map domain modules
+Split one service increment
+Add API gateway route
+Validate end-to-end flow","","",""
+"Cross-Platform Travel Planner App","Build a mobile app with offline itinerary support and map-based navigation.","Mobile Development","Mobile Developer","intermediate","explorer","Flutter, Firebase, Google Maps","Ship a feature-complete mobile planning app","mobile,flutter,offline,maps","Implement itinerary features
+Add offline sync strategy
+Integrate map navigation","Flutter Docs | https://docs.flutter.dev/
+Firebase Docs | https://firebase.google.com/docs","Create app navigation flow
+Build itinerary CRUD
+Add offline caching
+Integrate maps and location","","",""
+"Scalable API Domain Modeling","Create a domain-driven backend model for a scalable service platform.","Backend Architecture","Backend Developer","intermediate","explorer","Python, Django, PostgreSQL","Design maintainable backend architecture","backend,ddd,api,architecture","Define bounded contexts
+Model domain entities
+Design API contracts","Django Docs | https://docs.djangoproject.com/
+DDD Reference | https://martinfowler.com/bliki/DomainDrivenDesign.html","Draft domain model
+Implement service layer
+Expose REST endpoints
+Add architecture decision records","","",""
+"Smart IoT Sensor Ingestion Pipeline","Build an IoT ingestion pipeline for telemetry streams with anomaly alerts.","IoT Development","IoT Developer","intermediate","explorer","Python, MQTT, InfluxDB","Learn event-driven IoT backend pipelines","iot,mqtt,telemetry,alerts","Ingest sensor data streams
+Store time-series telemetry
+Trigger anomaly alerts","MQTT Essentials | https://www.hivemq.com/mqtt-essentials/
+InfluxDB Docs | https://docs.influxdata.com/","Set up MQTT broker
+Implement ingestion service
+Store and query telemetry
+Add alerting rules","","",""

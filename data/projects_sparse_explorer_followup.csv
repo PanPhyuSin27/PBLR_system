@@ -1,0 +1,15 @@
+title,description,field,target_role,skill_level,required_plan,tech_preference,learning_goal,interest_tags,learning_objectives,resources,task_checklist,detailed_roadmap,github_starter_template,premium_hints
+"Backend Service Boundary Analyzer","Analyze and refactor backend modules into clean service boundaries.","Backend Architecture","Backend Developer","intermediate","explorer","Python, Django, PostgreSQL","Improve backend modular architecture design","backend,modularity,architecture,refactor","Assess module coupling
+Define service boundaries
+Refactor integration points","Django Docs | https://docs.djangoproject.com/
+Refactoring Guru | https://refactoring.guru/","Map current dependencies
+Design new boundaries
+Refactor one vertical slice
+Validate API contracts","","",""
+"IoT Device Health Dashboard","Build a dashboard to monitor IoT fleet health, uptime, and fault rates.","IoT Development","IoT Developer","beginner","explorer","Python, MQTT, Grafana","Learn IoT observability and device monitoring","iot,monitoring,grafana,telemetry","Track fleet health metrics
+Visualize uptime and errors
+Create fault alert thresholds","Grafana Docs | https://grafana.com/docs/
+MQTT Essentials | https://www.hivemq.com/mqtt-essentials/","Collect device heartbeat events
+Store telemetry snapshots
+Build fleet dashboard panels
+Add threshold alerts","","",""
