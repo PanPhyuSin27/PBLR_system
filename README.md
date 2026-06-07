@@ -60,6 +60,90 @@ SmartLearn is a web-based learning platform designed to help students and aspiri
 * Light/Dark theme support.
 * Smooth authentication experience using modal-based interactions.
 
+---
+
+## 📁 Project Structure
+
+```text
+PBLR_system/
+│
+├── config/              # Main Django project configuration
+│   ├── settings.py
+│   ├── urls.py
+│   └── ...
+│
+├── users/               # User management and authentication
+│
+├── data/                # Project, recommendation, and learning-related features
+│
+├── media/               # Uploaded media files
+│
+├── db.sqlite3           # SQLite database
+│
+├── manage.py            # Django management script
+│
+└── README.md            # Project documentation
+```
+
+---
+
+## ⚙️ Installation & Setup
+
+### Prerequisites
+
+Make sure the following are installed on your system:
+
+* Python 3.10+
+* pip
+* Git
+
+### Clone the Repository
+
+```bash
+git clone https://github.com/your-username/PBLR_system.git
+cd PBLR_system
+```
+
+### Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+**Windows**
+
+```bash
+venv\Scripts\activate
+```
+
+**Mac/Linux**
+
+```bash
+source venv/bin/activate
+```
+
+### Apply Database Migrations
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### Run the Development Server
+
+```bash
+python manage.py runserver
+```
+
+### Access the Application
+
+Open your browser and visit:
+
+```text
+http://127.0.0.1:8000/
+```
 
 ---
 
