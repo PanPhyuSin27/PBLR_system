@@ -2,7 +2,7 @@
 
 ## 📖 Overview
 
-SmartLearn is a web-based learning platform designed to help students and aspiring developers discover, learn, and complete real-world projects based on their interests, skills, and career goals. The platform provides personalized project recommendations, structured learning workflows, curated learning resources, and premium features to enhance the learning experience.
+Is a web-based learning platform designed to help students and aspiring developers discover, learn, and complete real-world projects based on their interests, skills, and career goals. The platform provides personalized project recommendations, structured learning workflows, curated learning resources, and premium features to enhance the learning experience.
 
 ---
 
