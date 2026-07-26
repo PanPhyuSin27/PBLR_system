@@ -1510,6 +1510,7 @@
             </div>
             <div class="nav-right">
                 <div class="nav-links">
+                    
                     <a href="{% url 'project_library' %}">Project Library</a>
                     <a href="{% url 'resources' %}">Resources</a>
                     <a href="#plans">Plans</a>
@@ -1667,6 +1668,13 @@
         <section id="plans" class="section-block fade-up delay-2">
             <h2>Pricing Plans</h2>
             <p class="section-sub">Choose the plan that fits your learning pace and unlock the right level of project guidance.</p>
+            {% if premium_review_notice %}
+                {% if premium_review_notice.status == 'approved' %}
+                    <div class="plan-alert success">Your premium request was approved. Enjoy your new plan.</div>
+                {% elif premium_review_notice.status == 'rejected' %}
+                    <div class="plan-alert error">Your premium request was rejected. You can request again anytime.</div>
+                {% endif %}
+            {% endif %}
             {% if premium_request_error %}
                 <div class="plan-alert error">{{ premium_request_error }}</div>
             {% elif premium_request_success %}

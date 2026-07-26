@@ -68,6 +68,20 @@
     </div>
 {% endif %}
 
+{% if premium_review_notice %}
+    {% if premium_review_notice.status == 'approved' %}
+        <div class="info-card" style="border-color: #bbf7d0; background: #f0fdf4; margin-bottom: 12px;">
+            <strong style="display:block; margin-bottom: 6px;">Premium request approved.</strong>
+            <span class="helper-text">Your subscription is now active.</span>
+        </div>
+    {% elif premium_review_notice.status == 'rejected' %}
+        <div class="info-card" style="border-color: #fecaca; background: #fef2f2; margin-bottom: 12px;">
+            <strong style="display:block; margin-bottom: 6px;">Premium request rejected.</strong>
+            <span class="helper-text">You can request a premium plan again anytime.</span>
+        </div>
+    {% endif %}
+{% endif %}
+
 <div class="profile-view-stack">
     <section class="profile-view-card">
         <div class="profile-view-user">

@@ -1,0 +1,142 @@
+{% extends "users/admin_base.html" %}
+
+{% block title %}Admin Projects{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 1.1fr 0.9fr;
+        gap: 18px;
+    }
+    .panel {
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 16px;
+        background: var(--surface);
+    }
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    .search-box {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .search-box input {
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 14px;
+        min-width: 220px;
+    }
+    .project-list {
+        display: grid;
+        gap: 10px;
+    }
+    .project-row {
+        padding: 12px;
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .project-row h4 {
+        margin: 0 0 4px;
+    }
+    .form-stack {
+        display: grid;
+        gap: 12px;
+    }
+    .field-group label {
+        font-weight: 600;
+    }
+    .field-group input,
+    .field-group textarea,
+    .field-group select {
+        width: 100%;
+    }
+    .status-stack {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .status-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--surface) 90%, white 10%);
+        font-size: 14px;
+    }
+    @media (max-width: 980px) {
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Manage Projects</h1>
+<p class="page-sub">Add, update, and search through project catalog entries.</p>
+
+{% if messages %}
+    <div class="status-stack">
+        {% for message in messages %}
+            <div class="status-card status-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="admin-grid">
+    <section class="panel">
+        <div class="toolbar">
+            <h2>Project List</h2>
+            <form class="search-box" method="get">
+                <input type="search" name="q" placeholder="Search projects" value="{{ search_query }}" />
+                <button class="btn" type="submit">Search</button>
+            </form>
+        </div>
+        <div class="project-list">
+            {% for project in projects %}
+                <div class="project-row">
+                    <div>
+                        <h4>{{ project.title }}</h4>
+                        <div class="helper-text">{{ project.field }} • {{ project.get_required_plan_display }}</div>
+                    </div>
+                    <a class="btn" href="{% url 'admin_projects' %}?edit={{ project.id }}">Edit</a>
+                </div>
+            {% empty %}
+                <div class="helper-text">No projects found.</div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="panel">
+        <h2>{% if editing %}Edit Project{% else %}Create Project{% endif %}</h2>
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if editing %}
+                <input type="hidden" name="project_id" value="{{ editing.id }}" />
+            {% endif %}
+            {% for field in form %}
+                <div class="field-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="helper-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button class="btn" type="submit">Save Project</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

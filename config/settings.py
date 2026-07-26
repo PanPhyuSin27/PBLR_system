@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
 
     'users',
+    "django_dbml",
 ]
 
 SITE_ID = 2
@@ -66,12 +67,14 @@ AUTHENTICATION_BACKENDS = [
 
 LOGIN_REDIRECT_URL = "profile_view"
 LOGOUT_REDIRECT_URL = "home"
+LOGIN_REDIRECT_URL = "profile_view"
 
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_VERIFICATION = "none"
 SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_AUTO_SIGNUP = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

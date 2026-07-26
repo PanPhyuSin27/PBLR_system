@@ -1,0 +1,115 @@
+{% extends "users/admin_base.html" %}
+
+{% block title %}Admin Plans{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 18px;
+    }
+    .panel {
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 16px;
+        background: var(--surface);
+    }
+    .plan-list {
+        display: grid;
+        gap: 10px;
+    }
+    .plan-row {
+        padding: 12px;
+        border: 1px solid var(--stroke);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+    .plan-row h4 {
+        margin: 0 0 4px;
+    }
+    .form-stack {
+        display: grid;
+        gap: 12px;
+    }
+    .field-group label {
+        font-weight: 600;
+    }
+    .field-group input,
+    .field-group textarea {
+        width: 100%;
+    }
+    .status-stack {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .status-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--surface) 90%, white 10%);
+        font-size: 14px;
+    }
+    @media (max-width: 980px) {
+        .admin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Manage Plans</h1>
+<p class="page-sub">Create and update pricing plans for premium access.</p>
+
+{% if messages %}
+    <div class="status-stack">
+        {% for message in messages %}
+            <div class="status-card status-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="admin-grid">
+    <section class="panel">
+        <h2>{% if editing %}Edit Plan{% else %}Create Plan{% endif %}</h2>
+        <form method="post" class="form-stack">
+            {% csrf_token %}
+            {% if editing %}
+                <input type="hidden" name="plan_id" value="{{ editing.id }}" />
+            {% endif %}
+            {% for field in form %}
+                <div class="field-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="helper-text">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <button class="btn" type="submit">Save Plan</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Existing Plans</h2>
+        <div class="plan-list">
+            {% for plan in plans %}
+                <div class="plan-row">
+                    <div>
+                        <h4>{{ plan.name }}</h4>
+                        <div class="helper-text">{{ plan.price }} MMK</div>
+                    </div>
+                    <a class="btn" href="{% url 'admin_plans' %}?edit={{ plan.id }}">Edit</a>
+                </div>
+            {% empty %}
+                <div class="helper-text">No plans created yet.</div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+{% endblock %}

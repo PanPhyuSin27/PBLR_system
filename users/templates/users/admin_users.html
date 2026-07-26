@@ -1,0 +1,163 @@
+{% extends "users/admin_base.html" %}
+
+{% block title %}Admin Users{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+    }
+    .search-box {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .search-box input {
+        border: 1px solid var(--stroke);
+        border-radius: 999px;
+        padding: 8px 12px;
+        font-size: 14px;
+        min-width: 220px;
+    }
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    .admin-table th,
+    .admin-table td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--stroke);
+        vertical-align: top;
+    }
+    .admin-table th {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+        color: var(--muted);
+    }
+    .actions {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+    .action-btn {
+        border: 1px solid var(--stroke);
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .action-btn.primary {
+        background: var(--accent);
+        color: #fff;
+        border-color: transparent;
+    }
+    .status-stack {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 16px;
+    }
+    .status-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--surface) 90%, white 10%);
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="page-title">Manage Users</h1>
+<p class="page-sub">Search, activate, or grant admin access to accounts.</p>
+
+{% if messages %}
+    <div class="status-stack">
+        {% for message in messages %}
+            <div class="status-card status-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="toolbar">
+    <form class="search-box" method="get">
+        <input type="search" name="q" placeholder="Search by username or email" value="{{ search_query }}" />
+        <button class="btn" type="submit">Search</button>
+    </form>
+    <div class="helper-text">Total users: {{ users|length }}</div>
+</div>
+
+<table class="admin-table">
+    <thead>
+        <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Role</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for account in users %}
+            <tr>
+                <td><strong>{{ account.username }}</strong></td>
+                <td>{{ account.email|default:"-" }}</td>
+                <td>{% if account.is_active %}<span class="pill">Active</span>{% else %}<span class="pill">Inactive</span>{% endif %}</td>
+                <td>{% if account.is_staff %}<span class="pill">Admin</span>{% else %}<span class="pill">User</span>{% endif %}</td>
+                <td>
+                    <div class="actions">
+                        {% if account.is_active %}
+                            <form method="post" action="{% url 'admin_user_action' account.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="deactivate" />
+                                <button class="action-btn" type="submit">Deactivate</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'admin_user_action' account.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="activate" />
+                                <button class="action-btn primary" type="submit">Activate</button>
+                            </form>
+                        {% endif %}
+                        {% if account.is_staff %}
+                            <form method="post" action="{% url 'admin_user_action' account.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="remove_admin" />
+                                <button class="action-btn" type="submit">Remove Admin</button>
+                            </form>
+                        {% else %}
+                            <form method="post" action="{% url 'admin_user_action' account.id %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="make_admin" />
+                                <button class="action-btn" type="submit">Make Admin</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="5" class="helper-text">No users found.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

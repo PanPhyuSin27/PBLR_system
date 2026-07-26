@@ -19,6 +19,16 @@ urlpatterns = [
     path("profile/edit/", views.profile_create_or_update, name="profile_edit"),
     path("profile/request-premium/", views.request_premium_view, name="request_premium"),
 
-    path("login/", auth_views.LoginView.as_view(authentication_form=CustomAuthenticationForm), name="login"),
+    # path("login/", auth_views.LoginView.as_view(authentication_form=CustomAuthenticationForm), name="login"),
+    # AFTER:
+    path("login/", views.CustomLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(), name="logout"),
+
+    path("admin-portal/login/", views.admin_login_view, name="admin_login"),
+    path("admin-portal/", views.admin_dashboard_view, name="admin_dashboard"),
+    path("admin-portal/requests/<int:request_id>/review/", views.admin_review_request_view, name="admin_review_request"),
+    path("admin-portal/users/", views.admin_users_view, name="admin_users"),
+    path("admin-portal/users/<int:user_id>/action/", views.admin_user_action_view, name="admin_user_action"),
+    path("admin-portal/plans/", views.admin_plans_view, name="admin_plans"),
+    path("admin-portal/projects/", views.admin_projects_view, name="admin_projects"),
 ]

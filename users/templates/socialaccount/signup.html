@@ -1,0 +1,28 @@
+{% extends "socialaccount/base.html" %}
+
+{% block title %}Complete Sign Up{% endblock %}
+
+{% block content %}
+<div class="auth-shell single">
+    <div class="auth-card">
+        <h1>Complete Sign Up</h1>
+        <p class="sub">You are signing in with Google. Confirm your account details below:</p>
+
+        <form method="post" action="{% url 'socialaccount_signup' %}">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="field-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="error">{{ field.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+
+            <button class="auth-btn" type="submit">Complete Sign Up</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

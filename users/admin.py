@@ -1,6 +1,6 @@
 from django.contrib import admin, messages
 from django.utils import timezone
-from .models import Plan, PremiumRequest, Project, Subscription, UserProfile
+from .models import Plan, PremiumRequest, Project, Recommendation, Subscription, UserProject, UserProfile
 
 
 @admin.register(UserProfile)
@@ -18,9 +18,9 @@ class PlanAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-	list_display = ("title", "required_plan", "field", "target_role", "skill_level", "tech_preference")
-	list_filter = ("required_plan", "field", "skill_level", "target_role")
-	search_fields = ("title", "description", "field", "target_role", "tech_preference", "learning_goal", "interest_tags", "required_plan")
+	list_display = ("title", "plan", "required_plan", "field", "target_role", "skill_level", "tech_preference")
+	list_filter = ("plan", "required_plan", "field", "skill_level", "target_role")
+	search_fields = ("title", "description", "field", "target_role", "tech_preference", "learning_goal", "interest_tags", "required_plan", "plan__name")
 	fieldsets = (
 		("Core", {
 			"fields": (
@@ -29,6 +29,7 @@ class ProjectAdmin(admin.ModelAdmin):
 				"field",
 				"target_role",
 				"skill_level",
+				"plan",
 				"required_plan",
 			)
 		}),
@@ -45,6 +46,20 @@ class ProjectAdmin(admin.ModelAdmin):
 			)
 		}),
 	)
+
+
+@admin.register(Recommendation)
+class RecommendationAdmin(admin.ModelAdmin):
+	list_display = ("user", "project", "score", "rank", "updated_at")
+	list_filter = ("rank", "updated_at")
+	search_fields = ("user__username", "user__email", "project__title")
+
+
+@admin.register(UserProject)
+class UserProjectAdmin(admin.ModelAdmin):
+	list_display = ("user", "project", "status", "progress_percent", "updated_at")
+	list_filter = ("status",)
+	search_fields = ("user__username", "user__email", "project__title", "notes")
 
 
 @admin.register(Subscription)

@@ -645,10 +645,12 @@
                 RecoMagic
             </a>
             <div class="nav-actions">
+
+                
                 {% url 'project_library' as project_library_url %}
                 {% url 'resources' as resources_url %}
                 {% if user.is_authenticated %}
-                    <a href="{% url 'home' %}">Home</a>
+                    
                     {% if request.path != project_library_url %}
                         <a href="{{ project_library_url }}">Project Library</a>
                     {% endif %}
@@ -664,6 +666,9 @@
                             <a href="{% url 'profile_view' %}">View Profile</a>
                             <a href="{% url 'profile_edit' %}">Edit Profile</a>
                             <a href="{% url 'my_projects' %}">My Projects</a>
+                            {% if user.is_staff %}
+                                <a href="{% url 'admin_dashboard' %}">Admin Portal</a>
+                            {% endif %}
                             <button type="button" data-theme-toggle>Switch Theme</button>
                             <form method="post" action="{% url 'logout' %}">
                                 {% csrf_token %}

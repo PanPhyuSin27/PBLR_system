@@ -1,0 +1,269 @@
+{% extends "users/admin_base.html" %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_styles %}
+<style>
+    .admin-shell {
+        display: grid;
+        gap: 20px;
+    }
+    .admin-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+    }
+    .admin-header h1 {
+        margin: 0;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 28px;
+    }
+    .admin-section {
+        border: 1px solid var(--stroke);
+        border-radius: 16px;
+        padding: 18px;
+        background: var(--surface);
+        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
+    }
+    .status-stack {
+        display: grid;
+        gap: 10px;
+    }
+    .status-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--stroke);
+        background: color-mix(in srgb, var(--surface) 90%, white 10%);
+        font-size: 14px;
+    }
+    .status-success {
+        border-color: color-mix(in srgb, var(--accent) 45%, var(--stroke));
+    }
+    .status-warning {
+        border-color: #f59e0b;
+    }
+    .status-error {
+        border-color: #ef4444;
+    }
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    .admin-table th,
+    .admin-table td {
+        text-align: left;
+        padding: 10px 8px;
+        border-bottom: 1px solid var(--stroke);
+        vertical-align: top;
+    }
+    .admin-table th {
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+    }
+    .admin-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .admin-btn {
+        border: 1px solid var(--stroke);
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: var(--surface);
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .admin-btn.approve {
+        background: var(--accent);
+        color: #fff;
+        border-color: transparent;
+    }
+    .admin-btn.reject {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: transparent;
+    }
+    .pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 12px;
+        background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+        color: var(--muted);
+    }
+    .admin-empty {
+        border: 1px dashed var(--stroke);
+        border-radius: 14px;
+        padding: 18px;
+        color: var(--muted);
+        background: color-mix(in srgb, var(--surface) 90%, white 10%);
+    }
+    @media (max-width: 900px) {
+        .admin-table,
+        .admin-table thead {
+            display: none;
+        }
+        .admin-table tr {
+            display: grid;
+            gap: 8px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--stroke);
+        }
+        .admin-table td {
+            padding: 0;
+            border: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-shell">
+    <div class="admin-header">
+        <div>
+            <h1>Subscription Requests</h1>
+            <p class="page-sub">Review pending premium requests and keep subscriptions up to date.</p>
+        </div>
+    </div>
+
+    {% if messages %}
+        <div class="status-stack">
+            {% for message in messages %}
+                <div class="status-card status-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <section class="admin-section">
+        <h2 class="page-title">Admin Tools</h2>
+        <div class="status-stack">
+            <a class="status-card" href="{% url 'admin_users' %}">
+                <strong>Manage Users</strong>
+                <div class="helper-text">Activate accounts and grant admin access.</div>
+            </a>
+            <a class="status-card" href="{% url 'admin_projects' %}">
+                <strong>Manage Projects</strong>
+                <div class="helper-text">Edit catalog projects and premium access rules.</div>
+            </a>
+            <a class="status-card" href="{% url 'admin_plans' %}">
+                <strong>Manage Plans</strong>
+                <div class="helper-text">Update pricing, descriptions, and feature lists.</div>
+            </a>
+        </div>
+    </section>
+
+    <section class="admin-section">
+        <h2 class="page-title">Pending Requests</h2>
+        {% if pending_requests %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Plan</th>
+                        <th>Requested</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                        <tr>
+                            <td>
+                                <strong>{{ req.user.username }}</strong><br />
+                                <span class="helper-text">{{ req.user.email }}</span>
+                            </td>
+                            <td>
+                                {% if req.plan %}
+                                    {{ req.plan.name }}
+                                {% else %}
+                                    <span class="pill">No plan selected</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ req.requested_at|date:"Y-m-d H:i" }}</td>
+                            <td>{{ req.note|default:"-" }}</td>
+                            <td>
+                                <div class="admin-actions">
+                                    <form method="post" action="{% url 'admin_review_request' req.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="approve" />
+                                        <button class="admin-btn approve" type="submit">Approve</button>
+                                    </form>
+                                    <form method="post" action="{% url 'admin_review_request' req.id %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="reject" />
+                                        <button class="admin-btn reject" type="submit">Reject</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="admin-empty">No pending requests right now.</div>
+        {% endif %}
+    </section>
+
+    <section class="admin-section">
+        <h2 class="page-title">Recent Requests</h2>
+        {% if recent_requests %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Plan</th>
+                        <th>Status</th>
+                        <th>Reviewed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in recent_requests %}
+                        <tr>
+                            <td>{{ req.user.username }}</td>
+                            <td>{% if req.plan %}{{ req.plan.name }}{% else %}-{% endif %}</td>
+                            <td>{{ req.get_status_display }}</td>
+                            <td>{% if req.reviewed_at %}{{ req.reviewed_at|date:"Y-m-d H:i" }}{% else %}-{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="admin-empty">No requests found.</div>
+        {% endif %}
+    </section>
+
+    <section class="admin-section">
+        <h2 class="page-title">Active Subscriptions</h2>
+        {% if active_subscriptions %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Plan</th>
+                        <th>Ends</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for sub in active_subscriptions %}
+                        <tr>
+                            <td>{{ sub.user.username }}</td>
+                            <td>{{ sub.plan.name }}</td>
+                            <td>{{ sub.end_date }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="admin-empty">No active subscriptions.</div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

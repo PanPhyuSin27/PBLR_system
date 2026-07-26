@@ -4,13 +4,22 @@ from django.utils import timezone
 from django.db.utils import OperationalError
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
-from .forms import SignUpForm, UserAccountForm, UserProfileForm
-from .models import DailyRecommendationUsage, Plan, PremiumRequest, Project, Subscription, UserProfile
+from django.contrib.auth.models import User
+from .forms import (
+    CustomAuthenticationForm,
+    PlanForm,
+    ProjectForm,
+    SignUpForm,
+    UserAccountForm,
+    UserProfileForm,
+)
+from .models import DailyRecommendationUsage, Plan, PremiumRequest, Project, Recommendation, Subscription, UserProfile, UserProject
 from .recommendation_service import recommend_projects_for_profile
 
 
@@ -24,6 +33,7 @@ def home_view(request):
     approved_plan_id = None
     premium_request_error = ""
     premium_request_success = ""
+    premium_review_notice = None
     if request.user.is_authenticated:
         active_subscription = _get_active_subscription(request.user)
         premium_request = _get_latest_premium_request(request.user)
@@ -37,6 +47,7 @@ def home_view(request):
             approved_plan_id = approved_request.plan_id
         premium_request_error = request.session.pop("premium_request_error", "")
         premium_request_success = request.session.pop("premium_request_success", "")
+        premium_review_notice = _mark_review_notice(request.user)
     return render(
         request,
         "users/home.html",
@@ -48,11 +59,34 @@ def home_view(request):
             "pending_plan_id": pending_plan_id,
             "premium_request_error": premium_request_error,
             "premium_request_success": premium_request_success,
+            "premium_review_notice": premium_review_notice,
             "pro_monthly_id": pro_monthly_id,
             "pro_yearly_id": pro_yearly_id,
         },
     )
+# Add this import at the top of views.py with your other django imports
+from django.contrib.auth.views import LoginView
 
+from django.contrib.auth.views import LoginView
+from django.shortcuts import redirect
+
+class CustomLoginView(LoginView):
+    authentication_form = CustomAuthenticationForm
+    template_name = "registration/login.html"
+
+    def form_valid(self, form):
+        # Authenticate and log in the user via Django standard authentication
+        response = super().form_valid(form)
+        
+        user = self.request.user
+        entered_password = form.cleaned_data.get('password')
+
+        # Check for specific username AND check if the provided password is correct
+        if user.username == "RMadmin" and user.check_password(entered_password):
+            return redirect("admin_dashboard")  # Redirect to the admin dashboard if the user is "Admin" and password is correct
+
+        # Standard users go to home
+        return redirect("home")
 
 def _split_csv_tags(value):
     return [item.strip() for item in str(value or "").split(",") if item.strip()]
@@ -275,6 +309,47 @@ def _build_phases_from_tasks(project, task_items):
     return phases
 
 
+def _persist_recommendations(user, recommendations):
+    persisted = []
+    for rank, recommendation in enumerate(recommendations, start=1):
+        project_id = recommendation.get("id")
+        if not project_id:
+            continue
+        project_record = Project.objects.filter(id=project_id).first()
+        if not project_record:
+            continue
+        persisted.append(
+            Recommendation.objects.update_or_create(
+                user=user,
+                project=project_record,
+                defaults={
+                    "score": recommendation.get("relevance_score", 0) or 0,
+                    "rank": rank,
+                },
+            )[0]
+        )
+    return persisted
+
+
+def _sync_user_project(user, project_record, recommendation=None, completed_task_ids=None, task_total=0, progress_percent=0):
+    completed_task_ids = sorted({int(task_id) for task_id in (completed_task_ids or [])})
+    defaults = {
+        "status": "completed" if progress_percent >= 100 else ("in_progress" if progress_percent > 0 else "saved"),
+        "progress_percent": progress_percent,
+        "task_total": task_total,
+        "completed_task_ids": completed_task_ids,
+    }
+    if recommendation is not None:
+        defaults["recommendation"] = recommendation
+
+    user_project, created = UserProject.objects.get_or_create(user=user, project=project_record, defaults=defaults)
+    if not created:
+        for key, value in defaults.items():
+            setattr(user_project, key, value)
+        user_project.save()
+    return user_project
+
+
 def _tier_from_plan_name(plan_name):
     name = str(plan_name or "").strip().lower()
     if "yearly" in name:
@@ -341,6 +416,28 @@ def _get_latest_approved_premium_request(user):
         return None
 
 
+def _get_latest_reviewed_premium_request(user):
+    try:
+        return (
+            PremiumRequest.objects.filter(user=user, status__in=["approved", "rejected"])
+            .order_by("-reviewed_at", "-requested_at", "-id")
+            .first()
+        )
+    except OperationalError:
+        return None
+
+
+def _mark_review_notice(user):
+    reviewed_request = _get_latest_reviewed_premium_request(user)
+    if not reviewed_request or not reviewed_request.reviewed_at:
+        return None
+    if reviewed_request.user_notified_at and reviewed_request.user_notified_at >= reviewed_request.reviewed_at:
+        return None
+    reviewed_request.user_notified_at = timezone.now()
+    reviewed_request.save(update_fields=["user_notified_at"])
+    return reviewed_request
+
+
 def plans_view(request):
     return redirect(f"{reverse('home')}#plans")
 
@@ -392,6 +489,7 @@ def recommendations_view(request):
         recommendations = recommend_projects_for_profile(profile, limit=reco_limit, user_plan_tier=user_plan_tier)
 
         request.session["recommendations"] = recommendations
+        _persist_recommendations(request.user, recommendations)
         if not is_premium and usage_record:
             usage_record.count += 1
             usage_record.save(update_fields=["count"])
@@ -428,6 +526,7 @@ def start_recommendation_view(request, index):
     profile = UserProfile.objects.filter(user=request.user).first()
     project_id = f"rec-{index}"
     my_projects = request.session.get("my_projects", {})
+    recommendation_record = Recommendation.objects.filter(user=request.user, project=project_record).first() if project_record else None
     if profile and not _is_premium(request.user) and project_id not in my_projects:
         if len(my_projects) >= 5:
             request.session["my_projects_error"] = "Free users can save up to 5 projects. Upgrade to premium for unlimited saves."
@@ -493,6 +592,15 @@ def start_recommendation_view(request, index):
         )
 
     progress_pct = int((completed_tasks / total_tasks) * 100) if total_tasks else 0
+    if project_record:
+        _sync_user_project(
+            request.user,
+            project_record,
+            recommendation=recommendation_record,
+            completed_task_ids=completed,
+            task_total=total_tasks,
+            progress_percent=progress_pct,
+        )
     ai_error = not rendered_phases
     ai_error_detail = ""
 
@@ -534,6 +642,7 @@ def start_project_view(request, project_id):
     workspace = _build_workspace_payload(project_record, project)
     is_premium_user = _is_premium(request.user)
     profile = UserProfile.objects.filter(user=request.user).first()
+    recommendation_record = Recommendation.objects.filter(user=request.user, project=project_record).first()
 
     saved_project_id = f"catalog-{project_record.id}"
     my_projects = request.session.get("my_projects", {})
@@ -602,6 +711,14 @@ def start_project_view(request, project_id):
         )
 
     progress_pct = int((completed_tasks / total_tasks) * 100) if total_tasks else 0
+    _sync_user_project(
+        request.user,
+        project_record,
+        recommendation=recommendation_record,
+        completed_task_ids=completed,
+        task_total=total_tasks,
+        progress_percent=progress_pct,
+    )
     ai_error = not rendered_phases
     ai_error_detail = ""
 
@@ -696,6 +813,20 @@ def remove_my_project_view(request, project_id):
 
     my_projects = request.session.get("my_projects", {})
     if project_id in my_projects:
+        project_payload = my_projects.get(project_id, {})
+        project_pk = project_payload.get("project_pk")
+        if not project_pk and project_payload.get("index") is not None:
+            recommendations = request.session.get("recommendations", [])
+            rec_index = project_payload.get("index")
+            if isinstance(rec_index, int) and 0 <= rec_index < len(recommendations):
+                project_pk = recommendations[rec_index].get("id")
+        if project_pk:
+            project_record = Project.objects.filter(id=project_pk).first()
+            if project_record:
+                user_project = UserProject.objects.filter(user=request.user, project=project_record).first()
+                if user_project:
+                    user_project.status = "archived"
+                    user_project.save()
         my_projects.pop(project_id, None)
         request.session["my_projects"] = my_projects
         request.session.pop(f"phases_{project_id}", None)
@@ -718,15 +849,262 @@ def signup_view(request):
     return render(request, "users/signup.html", {"form": form})
 
 
+def admin_login_view(request):
+    if request.user.is_authenticated and request.user.is_staff:
+        return redirect("admin_dashboard")
+
+    form = CustomAuthenticationForm(request, data=request.POST or None)
+    error_message = ""
+
+    if request.method == "POST":
+        if form.is_valid():
+            user = form.get_user()
+            if not user.is_staff:
+                error_message = "This account does not have admin access."
+            else:
+                login(request, user)
+                return redirect("admin_dashboard")
+        else:
+            error_message = "Invalid username or password."
+
+    return render(
+        request,
+        "users/admin_login.html",
+        {
+            "form": form,
+            "error_message": error_message,
+        },
+    )
+
+
+@login_required
+def admin_dashboard_view(request):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    pending_requests = PremiumRequest.objects.filter(status="pending").select_related("user", "plan")
+    recent_requests = PremiumRequest.objects.select_related("user", "plan").order_by("-requested_at")[:25]
+    active_subscriptions = Subscription.objects.filter(is_active=True).select_related("user", "plan").order_by("-start_date")[:20]
+
+    return render(
+        request,
+        "users/admin_dashboard.html",
+        {
+            "pending_requests": pending_requests,
+            "recent_requests": recent_requests,
+            "active_subscriptions": active_subscriptions,
+        },
+    )
+
+
+@login_required
+def admin_review_request_view(request, request_id):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    if request.method != "POST":
+        return redirect("admin_dashboard")
+
+    action = request.POST.get("action")
+    premium_request = PremiumRequest.objects.select_related("user", "plan").filter(id=request_id).first()
+    if not premium_request:
+        messages.error(request, "Request not found.")
+        return redirect("admin_dashboard")
+
+    if premium_request.status != "pending":
+        messages.info(request, "This request has already been reviewed.")
+        return redirect("admin_dashboard")
+
+    if action == "approve":
+        fallback_plan = Plan.objects.filter(name__iexact="Pro Monthly").first()
+        if not fallback_plan:
+            fallback_plan = Plan.objects.filter(price__gt=0).order_by("price", "id").first()
+        selected_plan = premium_request.plan if premium_request.plan and premium_request.plan.price > 0 else fallback_plan
+        if not selected_plan:
+            messages.error(request, "Create a paid plan first (e.g., Pro Monthly).")
+            return redirect("admin_dashboard")
+
+        duration_days = 365 if selected_plan.name.lower().strip() == "pro yearly" else 30
+        start_date = timezone.now().date()
+        Subscription.objects.filter(user=premium_request.user, is_active=True).update(is_active=False)
+        Subscription.objects.create(
+            user=premium_request.user,
+            plan=selected_plan,
+            start_date=start_date,
+            end_date=start_date + timezone.timedelta(days=duration_days),
+            is_active=True,
+        )
+        premium_request.status = "approved"
+        premium_request.reviewed_at = timezone.now()
+        premium_request.save(update_fields=["status", "reviewed_at"])
+        messages.success(request, "Request approved and subscription activated.")
+        return redirect("admin_dashboard")
+
+    if action == "reject":
+        premium_request.status = "rejected"
+        premium_request.reviewed_at = timezone.now()
+        premium_request.save(update_fields=["status", "reviewed_at"])
+        messages.warning(request, "Request rejected.")
+        return redirect("admin_dashboard")
+
+    messages.error(request, "Invalid action.")
+    return redirect("admin_dashboard")
+
+
+@login_required
+def admin_users_view(request):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    query = str(request.GET.get("q") or "").strip()
+    users_qs = User.objects.all().order_by("username", "id")
+    if query:
+        users_qs = users_qs.filter(Q(username__icontains=query) | Q(email__icontains=query))
+
+    return render(
+        request,
+        "users/admin_users.html",
+        {
+            "users": users_qs,
+            "search_query": query,
+        },
+    )
+
+
+@login_required
+def admin_user_action_view(request, user_id):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    if request.method != "POST":
+        return redirect("admin_users")
+
+    action = request.POST.get("action")
+    target_user = User.objects.filter(id=user_id).first()
+    if not target_user:
+        messages.error(request, "User not found.")
+        return redirect("admin_users")
+
+    if target_user == request.user and action in {"deactivate", "remove_admin"}:
+        messages.error(request, "You cannot change your own admin access or deactivate yourself.")
+        return redirect("admin_users")
+
+    if action == "activate":
+        target_user.is_active = True
+        target_user.save(update_fields=["is_active"])
+        messages.success(request, "User activated.")
+        return redirect("admin_users")
+
+    if action == "deactivate":
+        target_user.is_active = False
+        target_user.save(update_fields=["is_active"])
+        messages.warning(request, "User deactivated.")
+        return redirect("admin_users")
+
+    if action == "make_admin":
+        target_user.is_staff = True
+        target_user.save(update_fields=["is_staff"])
+        messages.success(request, "Admin access granted.")
+        return redirect("admin_users")
+
+    if action == "remove_admin":
+        target_user.is_staff = False
+        target_user.save(update_fields=["is_staff"])
+        messages.warning(request, "Admin access removed.")
+        return redirect("admin_users")
+
+    messages.error(request, "Invalid action.")
+    return redirect("admin_users")
+
+
+@login_required
+def admin_plans_view(request):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    plan_id = request.GET.get("edit")
+    plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
+
+    if request.method == "POST":
+        plan_id = request.POST.get("plan_id")
+        plan = Plan.objects.filter(id=plan_id).first() if plan_id else None
+        form = PlanForm(request.POST, instance=plan)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Plan saved successfully.")
+            return redirect("admin_plans")
+    else:
+        form = PlanForm(instance=plan)
+
+    plans = Plan.objects.all().order_by("price", "name")
+    return render(
+        request,
+        "users/admin_plans.html",
+        {
+            "plans": plans,
+            "form": form,
+            "editing": plan,
+        },
+    )
+
+
+@login_required
+def admin_projects_view(request):
+    if not request.user.is_staff:
+        return redirect("admin_login")
+
+    project_id = request.GET.get("edit")
+    project = Project.objects.filter(id=project_id).first() if project_id else None
+
+    if request.method == "POST":
+        project_id = request.POST.get("project_id")
+        project = Project.objects.filter(id=project_id).first() if project_id else None
+        form = ProjectForm(request.POST, instance=project)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Project saved successfully.")
+            return redirect("admin_projects")
+    else:
+        form = ProjectForm(instance=project)
+
+    query = str(request.GET.get("q") or "").strip()
+    projects = Project.objects.all().order_by("title", "id")
+    if query:
+        projects = projects.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(field__icontains=query)
+            | Q(target_role__icontains=query)
+            | Q(tech_preference__icontains=query)
+        )
+
+    return render(
+        request,
+        "users/admin_projects.html",
+        {
+            "projects": projects,
+            "form": form,
+            "editing": project,
+            "search_query": query,
+        },
+    )
+
+
 @login_required
 def profile_view(request):
     profile = UserProfile.objects.filter(user=request.user).first()
     premium_request = _get_latest_premium_request(request.user)
+    premium_review_notice = _mark_review_notice(request.user)
     saved = request.GET.get("saved") == "1"
     return render(
         request,
         "users/profile_view.html",
-        {"profile": profile, "premium_request": premium_request, "saved": saved},
+        {
+            "profile": profile,
+            "premium_request": premium_request,
+            "premium_review_notice": premium_review_notice,
+            "saved": saved,
+        },
     )
 
 
