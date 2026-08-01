@@ -135,11 +135,13 @@
             transform-origin: left;
             transition: transform 0.24s ease;
         }
-        .nav-links a:hover {
+        .nav-links a:hover,
+        .nav-links a.active {
             color: var(--ink);
             border-color: transparent;
         }
-        .nav-links a:hover::after {
+        .nav-links a:hover::after,
+        .nav-links a.active::after {
             transform: scaleX(1);
         }
         .nav-login {
@@ -1510,10 +1512,11 @@
             </div>
             <div class="nav-right">
                 <div class="nav-links">
-                    
-                    <a href="{% url 'project_library' %}">Project Library</a>
-                    <a href="{% url 'resources' %}">Resources</a>
-                    <a href="#plans">Plans</a>
+                    {% url 'home' as home_url %}
+                    <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
+                    <a href="{% url 'project_library' %}" class="{% if request.path == '/project-library/' %}active{% endif %}">Project Library</a>
+                    <a href="{% url 'resources' %}" class="{% if request.path == '/resources/' %}active{% endif %}">Resources</a>
+                    <a href="#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
                 </div>
                 {% if user.is_authenticated %}
                     <div class="profile-menu" data-profile-menu>

@@ -140,9 +140,15 @@
             border-color: transparent;
         }
         .nav-actions > a:hover::after,
+        .nav-actions > a.active::after,
         .profile-trigger:hover::after,
-        .profile-menu.open .profile-trigger::after {
+        .profile-menu.open .profile-trigger::after,
+        .nav-actions > a.active {
             transform: scaleX(1);
+        }
+        .nav-actions > a.active,
+        .nav-links a.active {
+            color: var(--ink);
         }
         .profile-menu {
             position: relative;
@@ -645,19 +651,14 @@
                 RecoMagic
             </a>
             <div class="nav-actions">
-
-                
+                {% url 'home' as home_url %}
                 {% url 'project_library' as project_library_url %}
                 {% url 'resources' as resources_url %}
                 {% if user.is_authenticated %}
-                    
-                    {% if request.path != project_library_url %}
-                        <a href="{{ project_library_url }}">Project Library</a>
-                    {% endif %}
-                    {% if request.path != resources_url %}
-                        <a href="{{ resources_url }}">Resources</a>
-                    {% endif %}
-                    <a href="{% url 'home' %}#plans">Plans</a>
+                    <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
+                    <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
+                    <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
+                    <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
                     <div class="profile-menu" data-profile-menu>
                         <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false">
                             Profile ▾
@@ -677,13 +678,10 @@
                         </div>
                     </div>
                 {% else %}
-                    {% if request.path != project_library_url %}
-                        <a href="{{ project_library_url }}">Project Library</a>
-                    {% endif %}
-                    {% if request.path != resources_url %}
-                        <a href="{{ resources_url }}">Resources</a>
-                    {% endif %}
-                    <a href="{% url 'home' %}#plans">Plans</a>
+                    <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
+                    <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
+                    <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
+                    <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
                     <a href="{% url 'login' %}">Login</a>
                     <a class="btn btn-primary" href="{% url 'signup' %}">Sign Up</a>
                     <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
