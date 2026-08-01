@@ -1520,7 +1520,7 @@
                 </div>
                 {% if user.is_authenticated %}
                     <div class="profile-menu" data-profile-menu>
-                        <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false">
+                        <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false" class="{% if request.path == '/profile/' or request.path == '/profile/edit/' %}active{% endif %}">
                             Profile ▾
                         </button>
                         <div class="profile-dropdown" data-profile-dropdown>
@@ -1534,6 +1534,15 @@
                         </div>
                     </div>
                 {% endif %}
+                <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
+                    </svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="4" />
+                        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                </button>
             </div>
         </nav>
 
@@ -1882,6 +1891,7 @@
     </div>
     <script>
         const root = document.documentElement;
+        const toggles = Array.from(document.querySelectorAll("[data-theme-toggle]"));
         const scrollTopButton = document.querySelector("[data-scroll-top]");
         const highlightCards = Array.from(document.querySelectorAll("[data-highlight]"));
         const authOverlay = document.querySelector("[data-auth-overlay]");
@@ -1907,6 +1917,24 @@
         if (storedTheme) {
             root.setAttribute("data-theme", storedTheme);
         }
+
+        const setToggleLabel = () => {
+            const isDark = root.getAttribute("data-theme") === "dark";
+            toggles.forEach((toggle) => {
+                toggle.setAttribute("aria-label", isDark ? "Switch to light theme" : "Switch to dark theme");
+            });
+        };
+
+        setToggleLabel();
+
+        toggles.forEach((toggle) => {
+            toggle.addEventListener("click", () => {
+                const nextTheme = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+                root.setAttribute("data-theme", nextTheme);
+                localStorage.setItem("theme", nextTheme);
+                setToggleLabel();
+            });
+        });
 
         const shuffle = (items) => {
             const array = items.slice();
