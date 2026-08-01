@@ -807,6 +807,21 @@ def request_premium_view(request):
 
 
 @login_required
+def cancel_premium_request_view(request):
+    if request.method != "POST":
+        return redirect(f"{reverse('home')}#plans")
+
+    pending_request = PremiumRequest.objects.filter(user=request.user, status="pending").order_by("-requested_at", "-id").first()
+    if pending_request:
+        pending_request.delete()
+        request.session["premium_request_success"] = "Your premium request was cancelled successfully."
+    else:
+        request.session["premium_request_error"] = "You do not have a pending premium request to cancel."
+
+    return redirect(f"{reverse('home')}#plans")
+
+
+@login_required
 def remove_my_project_view(request, project_id):
     if request.method != "POST":
         return redirect("my_projects")

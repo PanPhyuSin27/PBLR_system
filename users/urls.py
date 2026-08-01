@@ -18,6 +18,7 @@ urlpatterns = [
     path("profile/", views.profile_view, name="profile_view"),
     path("profile/edit/", views.profile_create_or_update, name="profile_edit"),
     path("profile/request-premium/", views.request_premium_view, name="request_premium"),
+    path("profile/cancel-premium-request/", views.cancel_premium_request_view, name="cancel_premium_request"),
 
     # path("login/", auth_views.LoginView.as_view(authentication_form=CustomAuthenticationForm), name="login"),
     # AFTER:

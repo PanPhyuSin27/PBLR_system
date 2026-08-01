@@ -1715,7 +1715,13 @@
                         {% elif active_plan_id == pro_monthly_id or approved_plan_id == pro_monthly_id %}
                             <span class="plan-btn plan-btn-muted">Approved • Active</span>
                         {% elif pending_plan_id and pending_plan_id == pro_monthly_id %}
-                            <span class="plan-btn plan-btn-muted">Request Pending</span>
+                            <div style="display: grid; gap: 8px; width: 100%;">
+                                <span class="plan-btn plan-btn-muted">Request Pending</span>
+                                <form method="post" action="{% url 'cancel_premium_request' %}" style="width: 100%;">
+                                    {% csrf_token %}
+                                    <button class="plan-btn plan-btn-free" type="submit">Cancel Request</button>
+                                </form>
+                            </div>
                         {% elif active_plan_id %}
                             <span class="plan-btn plan-btn-muted">Active on another plan</span>
                         {% elif pending_plan_id %}
@@ -1747,7 +1753,13 @@
                         {% elif active_plan_id == pro_yearly_id or approved_plan_id == pro_yearly_id %}
                             <span class="plan-btn plan-btn-muted">Approved • Active</span>
                         {% elif pending_plan_id and pending_plan_id == pro_yearly_id %}
-                            <span class="plan-btn plan-btn-muted">Request Pending</span>
+                            <div style="display: grid; gap: 8px; width: 100%;">
+                                <span class="plan-btn plan-btn-muted">Request Pending</span>
+                                <form method="post" action="{% url 'cancel_premium_request' %}" style="width: 100%;">
+                                    {% csrf_token %}
+                                    <button class="plan-btn plan-btn-free" type="submit">Cancel Request</button>
+                                </form>
+                            </div>
                         {% elif active_plan_id %}
                             <span class="plan-btn plan-btn-muted">Active on another plan</span>
                         {% elif pending_plan_id %}

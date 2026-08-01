@@ -104,6 +104,12 @@
     <section class="profile-view-card">
         {% if premium_request %}
             <p class="helper-text" style="margin: 0 0 14px;">Premium request status: {{ premium_request.status|title }}</p>
+            {% if premium_request.status == 'pending' %}
+                <form method="post" action="{% url 'cancel_premium_request' %}" style="margin-bottom: 14px;">
+                    {% csrf_token %}
+                    <button class="btn" type="submit">Cancel Premium Request</button>
+                </form>
+            {% endif %}
         {% endif %}
 
         {% if profile %}
