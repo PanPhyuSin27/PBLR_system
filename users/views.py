@@ -24,6 +24,11 @@ from .recommendation_service import recommend_projects_for_profile
 
 
 def home_view(request):
+    return render(request, "users/home.html", _build_plan_context(request))
+
+
+def _build_plan_context(request):
+    plans = Plan.objects.order_by("price", "name")
     pro_monthly_id = Plan.objects.filter(name__iexact="Pro Monthly").values_list("id", flat=True).first()
     pro_yearly_id = Plan.objects.filter(name__iexact="Pro Yearly").values_list("id", flat=True).first()
     active_subscription = None
@@ -34,6 +39,7 @@ def home_view(request):
     premium_request_error = ""
     premium_request_success = ""
     premium_review_notice = None
+
     if request.user.is_authenticated:
         active_subscription = _get_active_subscription(request.user)
         premium_request = _get_latest_premium_request(request.user)
@@ -48,22 +54,20 @@ def home_view(request):
         premium_request_error = request.session.pop("premium_request_error", "")
         premium_request_success = request.session.pop("premium_request_success", "")
         premium_review_notice = _mark_review_notice(request.user)
-    return render(
-        request,
-        "users/home.html",
-        {
-            "active_subscription": active_subscription,
-            "active_plan_id": active_plan_id,
-            "approved_plan_id": approved_plan_id,
-            "premium_request": premium_request,
-            "pending_plan_id": pending_plan_id,
-            "premium_request_error": premium_request_error,
-            "premium_request_success": premium_request_success,
-            "premium_review_notice": premium_review_notice,
-            "pro_monthly_id": pro_monthly_id,
-            "pro_yearly_id": pro_yearly_id,
-        },
-    )
+
+    return {
+        "active_subscription": active_subscription,
+        "active_plan_id": active_plan_id,
+        "approved_plan_id": approved_plan_id,
+        "premium_request": premium_request,
+        "pending_plan_id": pending_plan_id,
+        "premium_request_error": premium_request_error,
+        "premium_request_success": premium_request_success,
+        "premium_review_notice": premium_review_notice,
+        "pro_monthly_id": pro_monthly_id,
+        "pro_yearly_id": pro_yearly_id,
+        "plans": plans,
+    }
 # Add this import at the top of views.py with your other django imports
 from django.contrib.auth.views import LoginView
 
@@ -439,7 +443,7 @@ def _mark_review_notice(user):
 
 
 def plans_view(request):
-    return redirect(f"{reverse('home')}#plans")
+    return render(request, "users/plans.html", _build_plan_context(request))
 
 
 @login_required

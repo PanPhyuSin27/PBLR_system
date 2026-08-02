@@ -576,7 +576,7 @@
                     <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
                     <a href="{% url 'project_library' %}" class="{% if request.path == '/project-library/' %}active{% endif %}">Project Library</a>
                     <a href="{% url 'resources' %}" class="{% if request.path == '/resources/' %}active{% endif %}">Resources</a>
-                    <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
+                    <a href="{% url 'plans' %}" class="{% if request.path == '/plans/' %}active{% endif %}">Plans</a>
                 </div>
                 {% if user.is_authenticated %}
                     <div class="profile-menu" data-profile-menu>
@@ -678,7 +678,7 @@
                     <a href="{% url 'home' %}">Home</a>
                     <a href="{% url 'project_library' %}">Project Library</a>
                     <a href="{% url 'resources' %}">Resources</a>
-                    <a href="{% url 'home' %}#plans">Plans</a>
+                    <a href="{% url 'plans' %}">Plans</a>
                 </div>
                 <div class="footer-col">
                     <h4>Learning</h4>
@@ -698,7 +698,7 @@
                     <h4>Support</h4>
                     <a href="{% url 'resources' %}">Learning Resources</a>
                     <a href="{% url 'project_library' %}">Project Guide</a>
-                    <a href="{% url 'home' %}#plans">Subscription Help</a>
+                    <a href="{% url 'plans' %}">Subscription Help</a>
                     <a href="{% url 'home' %}">FAQ</a>
                 </div>
             </div>
