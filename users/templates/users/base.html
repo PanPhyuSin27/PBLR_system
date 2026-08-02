@@ -1,19 +1,13 @@
 <!DOCTYPE html>
 <html data-theme="light">
+
 <head>
     <title>{% block title %}PBL System{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap"
-    />
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-    />
-    {% block extra_styles %}{% endblock %}
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@400;500;600&display=swap" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" /> {% block extra_styles %}{% endblock %}
     <style>
-        :root {
+         :root {
             --ink: #0c0d0f;
             --muted: #5b5f66;
             --accent: #ff6f3d;
@@ -23,6 +17,7 @@
             --glow-a: #ffe8db;
             --glow-b: #e8f4ff;
         }
+        
         [data-theme="dark"] {
             --ink: #f4f6f8;
             --muted: #b7bdc5;
@@ -33,26 +28,29 @@
             --glow-a: rgba(255, 111, 61, 0.22);
             --glow-b: rgba(93, 173, 255, 0.2);
         }
+        
         * {
             box-sizing: border-box;
         }
+        
         body {
             margin: 0;
             font-family: "Manrope", sans-serif;
             color: var(--ink);
-            background: radial-gradient(900px 480px at 15% -5%, var(--glow-a) 0, transparent 62%),
-                radial-gradient(700px 420px at 90% 8%, var(--glow-b) 0, transparent 60%),
-                var(--bg);
+            background: radial-gradient(900px 480px at 15% -5%, var(--glow-a) 0, transparent 62%), radial-gradient(700px 420px at 90% 8%, var(--glow-b) 0, transparent 60%), var(--bg);
         }
+        
         a {
             color: inherit;
             text-decoration: none;
         }
+        
         .page {
             max-width: 1100px;
             margin: 0 auto;
             padding: 40px 24px 24px;
         }
+        
         .nav {
             display: flex;
             align-items: center;
@@ -68,11 +66,13 @@
             box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
             margin-bottom: 24px;
         }
+        
         [data-theme="dark"] .nav {
             background: linear-gradient(120deg, rgba(18, 22, 28, 0.92), rgba(18, 22, 28, 0.8));
             border-color: rgba(255, 255, 255, 0.08);
             box-shadow: 0 14px 30px rgba(0, 0, 0, 0.35);
         }
+        
         .brand {
             display: flex;
             align-items: center;
@@ -81,6 +81,7 @@
             font-weight: 700;
             font-size: 20px;
         }
+        
         .brand-badge {
             width: 36px;
             height: 36px;
@@ -92,6 +93,7 @@
             font-size: 16px;
             box-shadow: 0 10px 18px rgba(255, 111, 61, 0.34);
         }
+        
         .nav-links,
         .nav-actions {
             display: flex;
@@ -100,7 +102,8 @@
             font-size: 14px;
             color: var(--muted);
         }
-        .nav-actions > a,
+        
+        .nav-actions>a,
         .profile-trigger {
             padding-bottom: 2px;
             border-bottom: 2px solid transparent;
@@ -108,7 +111,8 @@
             position: relative;
             font-weight: 600;
         }
-        .nav-actions > a::after,
+        
+        .nav-actions>a::after,
         .profile-trigger::after {
             content: "";
             position: absolute;
@@ -122,6 +126,7 @@
             transform-origin: left;
             transition: transform 0.24s ease;
         }
+        
         .profile-trigger {
             border: 0;
             background: transparent;
@@ -133,26 +138,31 @@
             align-items: center;
             gap: 4px;
         }
-        .nav-actions > a:hover,
+        
+        .nav-actions>a:hover,
         .profile-trigger:hover,
         .profile-menu.open .profile-trigger {
             color: var(--ink);
             border-color: transparent;
         }
-        .nav-actions > a:hover::after,
-        .nav-actions > a.active::after,
+        
+        .nav-actions>a:hover::after,
+        .nav-actions>a.active::after,
         .profile-trigger:hover::after,
         .profile-menu.open .profile-trigger::after,
-        .nav-actions > a.active {
+        .nav-actions>a.active {
             transform: scaleX(1);
         }
-        .nav-actions > a.active,
+        
+        .nav-actions>a.active,
         .nav-links a.active {
             color: var(--ink);
         }
+        
         .profile-menu {
             position: relative;
         }
+        
         .profile-dropdown {
             position: absolute;
             right: 0;
@@ -167,13 +177,16 @@
             z-index: 30;
             backdrop-filter: blur(12px);
         }
+        
         [data-theme="dark"] .profile-dropdown {
             background: rgba(18, 22, 28, 0.95);
         }
+        
         .profile-menu.open .profile-dropdown {
             display: grid;
             gap: 4px;
         }
+        
         .profile-dropdown a,
         .profile-dropdown button {
             width: 100%;
@@ -187,17 +200,21 @@
             cursor: pointer;
             font-family: inherit;
         }
+        
         .profile-dropdown a:hover,
         .profile-dropdown button:hover {
             background: rgba(15, 23, 42, 0.06);
         }
+        
         [data-theme="dark"] .profile-dropdown a:hover,
         [data-theme="dark"] .profile-dropdown button:hover {
             background: rgba(255, 255, 255, 0.08);
         }
+        
         .profile-dropdown form {
             margin: 0;
         }
+        
         .theme-toggle {
             border: 1px solid var(--stroke);
             background: var(--surface);
@@ -212,27 +229,34 @@
             justify-content: center;
             gap: 6px;
         }
+        
         .theme-toggle svg {
             width: 16px;
             height: 16px;
             display: block;
         }
+        
         .theme-toggle .icon-sun {
             display: none;
         }
+        
         [data-theme="dark"] .theme-toggle .icon-sun {
             display: block;
         }
+        
         [data-theme="dark"] .theme-toggle .icon-moon {
             display: none;
         }
+        
         .theme-toggle:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
         }
+        
         .nav-links a:hover {
             color: var(--ink);
         }
+        
         .btn {
             border: 1px solid var(--stroke);
             padding: 8px 16px;
@@ -243,15 +267,18 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
+        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
         }
+        
         .btn-primary {
             background: var(--accent);
             color: #fff;
             border-color: transparent;
         }
+        
         .content {
             background: var(--surface);
             border: 1px solid var(--stroke);
@@ -259,70 +286,138 @@
             padding: 28px;
             box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
         }
+        /* Updated Site Footer Component */
+        
         .site-footer {
-            margin-top: 26px;
-            background: #e7ebf1;
-            border-top: 1px solid #d3dae6;
+            margin-top: 40px;
+            background: var(--surface);
+            border: 1px solid var(--stroke);
             border-radius: 18px;
-            padding: 0;
-            color: #0f172a;
+            padding: 36px 32px 20px;
+            color: var(--ink);
+            box-shadow: 0 14px 28px rgba(15, 23, 42, 0.05);
+            transition: background-color 0.3s ease, border-color 0.3s ease;
         }
-        [data-theme="dark"] .site-footer {
-            background: #151b25;
-            border-top-color: #2a3342;
-            color: #e8edf8;
-        }
+        /* Footer Layout Grid */
+        
         .footer-grid {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 24px;
-            padding: 28px 0;
+            /* 1 wide brand column + 4 uniform link columns */
+            grid-template-columns: 1.8fr repeat(4, minmax(0, 1fr));
+            gap: 32px;
+            padding-bottom: 28px;
+            border-bottom: 1px solid var(--stroke);
         }
-        .footer-col h4 {
-            margin: 0 0 10px;
-            font-family: "Manrope", sans-serif;
-            font-size: 18px;
-            color: inherit;
+        /* Individual Footer Columns */
+        
+        .footer-col {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .footer-col a {
-            display: block;
-            margin: 0 0 8px;
-            color: #1f2a3a;
-            font-size: 14px;
-            line-height: 1.45;
+        
+        .footer-col.brand-col {
+            gap: 12px;
+            padding-right: 16px;
         }
-        [data-theme="dark"] .footer-col a {
-            color: #c6d0e0;
-        }
-        .footer-col a:hover {
-            color: #1458c0;
-        }
-        .footer-bottom {
-            padding: 0 0 16px;
+        
+        .footer-tagline {
             font-size: 13px;
-            color: #5b6678;
+            line-height: 1.5;
+            color: var(--muted);
+            margin: 0;
+            max-width: 260px;
+        }
+        
+        .footer-col h4 {
+            margin: 0 0 4px;
+            font-family: "Space Grotesk", sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+        }
+        
+        .footer-col a {
+            display: inline-block;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.4;
+            width: fit-content;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        
+        .footer-col a:hover {
+            color: var(--accent);
+            transform: translateX(3px);
+            /* Subtle nudge animation */
+        }
+        /* Footer Bottom Bar */
+        
+        .footer-bottom {
+            padding-top: 20px;
+            font-size: 13px;
+            color: var(--muted);
             display: flex;
             justify-content: space-between;
-            gap: 8px;
+            align-items: center;
+            gap: 12px;
             flex-wrap: wrap;
         }
+        /* Responsive Overrides */
+        
+        @media (max-width: 900px) {
+            .footer-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 28px;
+            }
+            .footer-col.brand-col {
+                grid-column: span 2;
+            }
+            .footer-tagline {
+                max-width: 100%;
+            }
+        }
+        
+        @media (max-width: 540px) {
+            .site-footer {
+                padding: 24px 20px 16px;
+            }
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .footer-col.brand-col {
+                grid-column: span 1;
+            }
+            .footer-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+        }
+        
         [data-theme="dark"] .footer-bottom {
             color: #93a0b5;
         }
+        
         .form-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
         }
+        
         .field-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
             font-size: 14px;
         }
+        
         .field-group label {
             font-weight: 600;
         }
+        
         .field-group input,
         .field-group select,
         .field-group textarea {
@@ -333,10 +428,12 @@
             font-family: inherit;
             background: var(--surface);
         }
+        
         .field-group textarea {
             min-height: 96px;
             resize: vertical;
         }
+        
         .form-actions {
             display: flex;
             gap: 12px;
@@ -344,30 +441,36 @@
             margin-top: 18px;
             flex-wrap: wrap;
         }
+        
         .helper-text {
             color: var(--muted);
             font-size: 13px;
         }
+        
         .page-title {
             font-family: "Space Grotesk", sans-serif;
             font-size: 28px;
             margin: 0 0 8px;
         }
+        
         .page-sub {
             color: var(--muted);
             margin: 0 0 24px;
         }
+        
         .profile-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 16px;
         }
+        
         .info-card {
             padding: 16px;
             border: 1px solid var(--stroke);
             border-radius: 14px;
             background: var(--surface);
         }
+        
         .info-card span {
             display: block;
             font-size: 12px;
@@ -376,11 +479,13 @@
             color: var(--muted);
             margin-bottom: 6px;
         }
+        
         .recommendations-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 16px;
         }
+        
         .rec-card {
             padding: 16px;
             border: 1px solid var(--stroke);
@@ -391,6 +496,7 @@
             gap: 10px;
             position: relative;
         }
+        
         .card-close {
             position: absolute;
             top: 10px;
@@ -407,26 +513,31 @@
             cursor: pointer;
             transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
         }
+        
         .card-close:hover {
             color: var(--ink);
             transform: translateY(-1px);
             box-shadow: 0 8px 16px rgba(15, 23, 42, 0.12);
         }
+        
         .rec-card h3 {
             margin: 0;
             font-size: 18px;
         }
+        
         .rec-meta {
             font-size: 12px;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             color: var(--muted);
         }
+        
         .pill-list {
             display: flex;
             flex-wrap: wrap;
             gap: 6px;
         }
+        
         .pill {
             font-size: 12px;
             padding: 4px 8px;
@@ -434,27 +545,32 @@
             border: 1px solid var(--stroke);
             color: var(--muted);
         }
+        
         .rec-actions {
             margin-top: auto;
             display: flex;
             gap: 10px;
             align-items: center;
         }
+        
         .progress-wrap {
             margin: 16px 0 24px;
         }
+        
         .progress-bar {
             height: 10px;
             border-radius: 999px;
             background: #f1eee9;
             overflow: hidden;
         }
+        
         .progress-bar span {
             display: block;
             height: 100%;
             background: var(--accent);
             width: 0;
         }
+        
         .phase-card {
             border: 1px solid var(--stroke);
             border-radius: 14px;
@@ -462,9 +578,11 @@
             margin-bottom: 16px;
             background: #fff;
         }
+        
         .phase-card h3 {
             margin: 0 0 6px;
         }
+        
         .task-list {
             list-style: none;
             padding: 0;
@@ -472,11 +590,13 @@
             display: grid;
             gap: 10px;
         }
+        
         .task-item {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+        
         .empty-state {
             padding: 20px;
             border: 1px dashed var(--stroke);
@@ -484,6 +604,7 @@
             color: var(--muted);
             background: rgba(255, 255, 255, 0.8);
         }
+        
         @media (max-width: 800px) {
             .profile-grid {
                 grid-template-columns: 1fr;
@@ -506,7 +627,7 @@
                 justify-content: center;
             }
         }
-
+        
         .auth-overlay {
             position: fixed;
             inset: 0;
@@ -517,11 +638,11 @@
             z-index: 999;
             padding: 16px;
         }
-
+        
         .auth-overlay.show {
             display: flex;
         }
-
+        
         .auth-modal {
             width: auto;
             max-width: 96vw;
@@ -533,7 +654,7 @@
             position: relative;
             box-shadow: none;
         }
-
+        
         .auth-close {
             position: absolute;
             right: -14px;
@@ -549,19 +670,19 @@
             cursor: pointer;
             z-index: 3;
         }
-
+        
         .auth-content {
             width: auto;
             height: auto;
             overflow: visible;
             padding: 0;
         }
-
+        
         .auth-content .auth-shell {
             max-width: 420px;
             margin: 0 auto;
         }
-
+        
         .auth-content .auth-card {
             width: 100%;
             background: var(--surface);
@@ -571,12 +692,12 @@
             box-shadow: 0 20px 40px rgba(15, 23, 42, 0.22);
             text-align: center;
         }
-
+        
         .auth-content .field-group {
             text-align: left;
             margin-bottom: 12px;
         }
-
+        
         .auth-content .field-group input {
             width: 100%;
             padding: 10px;
@@ -584,12 +705,12 @@
             border-radius: 10px;
             background: #f7f7f7;
         }
-
+        
         [data-theme="dark"] .auth-content .field-group input {
             background: rgba(255, 255, 255, 0.06);
             color: var(--ink);
         }
-
+        
         .auth-content .auth-btn {
             width: 100%;
             padding: 12px;
@@ -601,13 +722,13 @@
             cursor: pointer;
             margin-top: 10px;
         }
-
+        
         .auth-content .divider {
             margin: 12px 0 16px;
             color: var(--muted);
             font-size: 13px;
         }
-
+        
         .auth-content .socials {
             display: flex;
             justify-content: center;
@@ -615,7 +736,7 @@
             margin-bottom: 14px;
             font-size: 18px;
         }
-
+        
         .auth-content .socials button,
         .auth-content .socials a.social-btn {
             border: none;
@@ -629,13 +750,13 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         .auth-content .socials a.social-btn svg {
             width: 20px;
             height: 20px;
             display: block;
         }
-
+        
         .auth-content .error {
             color: #dc2626;
             font-size: 13px;
@@ -643,47 +764,41 @@
         }
     </style>
 </head>
+
 <body>
     <div class="page">
         <nav class="nav">
             <a class="brand" href="{% url 'home' %}">
-                <span class="brand-badge">RM</span>
-                RecoMagic
+                <span class="brand-badge">RM</span> RecoMagic
             </a>
             <div class="nav-actions">
-                {% url 'home' as home_url %}
-                {% url 'project_library' as project_library_url %}
-                {% url 'resources' as resources_url %}
-                {% if user.is_authenticated %}
-                    <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
-                    <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
-                    <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
-                    <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
-                    <div class="profile-menu" data-profile-menu>
-                        <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false" class="{% if request.path == '/profile/' or request.path == '/profile/edit/' %}active{% endif %}">
+                {% url 'home' as home_url %} {% url 'project_library' as project_library_url %} {% url 'resources' as resources_url %} {% if user.is_authenticated %}
+                <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
+                <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
+                <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
+                <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
+                <div class="profile-menu" data-profile-menu>
+                    <button class="profile-trigger" type="button" data-profile-toggle aria-expanded="false" class="{% if request.path == '/profile/' or request.path == '/profile/edit/' %}active{% endif %}">
                             Profile ▾
                         </button>
-                        <div class="profile-dropdown" data-profile-dropdown>
-                            <a href="{% url 'profile_view' %}">View Profile</a>
-                            <a href="{% url 'profile_edit' %}">Edit Profile</a>
-                            <a href="{% url 'my_projects' %}">My Projects</a>
-                            {% if user.is_staff %}
-                                <a href="{% url 'admin_dashboard' %}">Admin Portal</a>
-                            {% endif %}
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit">Logout</button>
-                            </form>
-                        </div>
+                    <div class="profile-dropdown" data-profile-dropdown>
+                        <a href="{% url 'profile_view' %}">View Profile</a>
+                        <a href="{% url 'profile_edit' %}">Edit Profile</a>
+                        <a href="{% url 'my_projects' %}">My Projects</a> {% if user.is_staff %}
+                        <a href="{% url 'admin_dashboard' %}">Admin Portal</a> {% endif %}
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit">Logout</button>
+                        </form>
                     </div>
+                </div>
                 {% else %}
-                    <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
-                    <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
-                    <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
-                    <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
-                    <a href="{% url 'login' %}">Login</a>
-                    <a class="btn btn-primary" href="{% url 'signup' %}">Sign Up</a>
-                {% endif %}
+                <a href="{{ home_url }}" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Home</a>
+                <a href="{{ project_library_url }}" class="{% if request.path == project_library_url %}active{% endif %}">Project Library</a>
+                <a href="{{ resources_url }}" class="{% if request.path == resources_url %}active{% endif %}">Resources</a>
+                <a href="{% url 'home' %}#plans" class="{% if request.path == home_url or request.path == '/' %}active{% endif %}">Plans</a>
+                <a href="{% url 'login' %}">Login</a>
+                <a class="btn btn-primary" href="{% url 'signup' %}">Sign Up</a> {% endif %}
                 <button class="theme-toggle" type="button" aria-label="Switch to dark theme" data-theme-toggle>
                     <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z" />
@@ -702,38 +817,52 @@
 
         <footer class="site-footer">
             <div class="footer-grid">
+                <!-- Brand Column -->
+                <div class="footer-col brand-col">
+                    <div class="brand">
+                        <span class="brand-badge">RM</span>
+                        <span>RecoMagic</span>
+                    </div>
+                    <p class="footer-tagline">Mastering real-world developer skills through personalized, project-based learning tracks.</p>
+                </div>
+
+                <!-- Platform Column -->
                 <div class="footer-col">
                     <h4>Platform</h4>
                     <a href="{% url 'home' %}">Home</a>
                     <a href="{% url 'project_library' %}">Project Library</a>
-                    <a href="{% url 'resources' %}">Resources</a>
-                    <a href="{% url 'home' %}#plans">Plans</a>
+                    <a href="{% url 'home' %}#plans">Plans & Pricing</a>
                 </div>
+
+                <!-- Learning Column -->
                 <div class="footer-col">
                     <h4>Learning</h4>
                     <a href="{% url 'recommendations' %}">Recommendations</a>
-                    <a href="{% url 'projects' %}">All Projects</a>
-                    <a href="{% url 'my_projects' %}">My Projects</a>
-                    <a href="{% url 'project_library' %}">Learning Tracks</a>
+                    <a href="{% url 'projects' %}">All Projects</a> {% if user.is_authenticated %}
+                    <a href="{% url 'my_projects' %}">My Projects</a> {% endif %}
                 </div>
+
+                <!-- Account Column (Dynamic) -->
                 <div class="footer-col">
                     <h4>Account</h4>
+                    {% if user.is_authenticated %}
                     <a href="{% url 'profile_view' %}">View Profile</a>
-                    <a href="{% url 'profile_edit' %}">Edit Profile</a>
+                    <a href="{% url 'profile_edit' %}">Edit Profile</a> {% else %}
                     <a href="{% url 'login' %}">Log In</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
+                    <a href="{% url 'signup' %}">Sign Up</a> {% endif %}
                 </div>
+
+                <!-- Support Column -->
                 <div class="footer-col">
                     <h4>Support</h4>
-                    <a href="{% url 'resources' %}">Learning Resources</a>
-                    <a href="{% url 'project_library' %}">Project Guide</a>
-                    <a href="{% url 'home' %}#plans">Subscription Help</a>
+                    <a href="{% url 'resources' %}">Resources</a>
                     <a href="{% url 'home' %}#faq">FAQ</a>
                 </div>
             </div>
+
             <div class="footer-bottom">
-                <span>© RecoMagic 2026</span>
-                <span>Built with Django and project-based learning.</span>
+                <span>&copy; {% now "Y" %} RecoMagic. All rights reserved.</span>
+                <span>Built with Django &amp; project-based learning.</span>
             </div>
         </footer>
     </div>
@@ -833,7 +962,7 @@
                 return;
             }
 
-            form.addEventListener("submit", async (event) => {
+            form.addEventListener("submit", async(event) => {
                 event.preventDefault();
                 const action = form.getAttribute("action") || currentAuthUrl || window.location.href;
                 const payload = new FormData(form);
@@ -841,7 +970,9 @@
                     method: "POST",
                     body: payload,
                     credentials: "same-origin",
-                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
                     redirect: "follow",
                 });
                 const finalUrl = response.url || action;
@@ -857,14 +988,16 @@
             });
         };
 
-        const openAuthOverlay = async (url) => {
+        const openAuthOverlay = async(url) => {
             if (!authOverlay || !authContent) {
                 window.location.href = url;
                 return;
             }
             const response = await fetch(url, {
                 credentials: "same-origin",
-                headers: { "X-Requested-With": "XMLHttpRequest" },
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest"
+                },
                 redirect: "follow",
             });
             const html = await response.text();
@@ -931,4 +1064,5 @@
     </script>
     {% block extra_scripts %}{% endblock %}
 </body>
+
 </html>
