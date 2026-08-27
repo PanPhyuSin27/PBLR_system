@@ -462,18 +462,20 @@ def recommendations_view(request):
         premium_request_pending = PremiumRequest.objects.filter(user=request.user, status="pending").exists()
         is_premium = is_premium_user
         reco_limit = 6 if is_premium else 3
+        usage_date = timezone.localdate()
+        cached_recommendations = request.session.get("recommendations", [])
 
         usage_record = None
         if not is_premium:
             usage_record, _ = DailyRecommendationUsage.objects.get_or_create(
                 user=request.user,
-                usage_date=timezone.localdate(),
+                usage_date=usage_date,
                 defaults={"count": 0},
             )
 
         if not is_premium and usage_record and usage_record.count >= reco_limit:
             reco_limited = True
-            recommendations = request.session.get("recommendations", [])[:reco_limit]
+            recommendations = cached_recommendations[:reco_limit]
             remaining = 0
             return render(
                 request,
@@ -490,7 +492,13 @@ def recommendations_view(request):
                     "is_premium_user": is_premium_user,
                 },
             )
-        recommendations = recommend_projects_for_profile(profile, limit=reco_limit, user_plan_tier=user_plan_tier)
+        previous_project_ids = [project.get("id") for project in cached_recommendations if project.get("id")]
+        recommendations = recommend_projects_for_profile(
+            profile,
+            limit=reco_limit,
+            user_plan_tier=user_plan_tier,
+            exclude_project_ids=previous_project_ids,
+        )
 
         request.session["recommendations"] = recommendations
         _persist_recommendations(request.user, recommendations)

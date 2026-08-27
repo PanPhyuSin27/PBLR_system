@@ -1,4 +1,4 @@
-from django.db.models import Q
+import random
 
 from .models import Project
 
@@ -18,7 +18,7 @@ def _split_tags(value):
     return {tag.strip().lower() for tag in str(value or "").split(",") if tag.strip()}
 
 
-def recommend_projects_for_profile(profile, limit=6, user_plan_tier="explorer"):
+def recommend_projects_for_profile(profile, limit=6, user_plan_tier="explorer", exclude_project_ids=None):
     profile_field = _normalize(profile.field)
     profile_skill = _normalize(profile.skill_level)
     profile_tech = _normalize(profile.tech_preference)
@@ -31,27 +31,9 @@ def recommend_projects_for_profile(profile, limit=6, user_plan_tier="explorer"):
     user_rank = PLAN_RANK.get(user_plan_tier, 0)
     allowed_tiers = [tier for tier, rank in PLAN_RANK.items() if rank <= user_rank]
 
-    tag_filter = None
-    for tag in profile_tags:
-        condition = Q(interest_tags__icontains=tag)
-        tag_filter = condition if tag_filter is None else tag_filter | condition
-
-    candidate_filter = None
-    if profile_field:
-        condition = Q(field__iexact=profile.field)
-        candidate_filter = condition if candidate_filter is None else candidate_filter | condition
-    if profile_tech:
-        condition = Q(tech_preference__icontains=profile.tech_preference)
-        candidate_filter = condition if candidate_filter is None else candidate_filter | condition
-    if profile_goal:
-        condition = Q(learning_goal__icontains=profile.learning_goal)
-        candidate_filter = condition if candidate_filter is None else candidate_filter | condition
-    if tag_filter is not None:
-        candidate_filter = tag_filter if candidate_filter is None else candidate_filter | tag_filter
-
     projects_qs = Project.objects.filter(skill_level=profile.skill_level, required_plan__in=allowed_tiers)
-    if candidate_filter is not None:
-        projects_qs = projects_qs.filter(candidate_filter)
+    if profile_field:
+        projects_qs = projects_qs.filter(field__iexact=profile.field)
 
     scored = []
     for project in projects_qs:
@@ -79,7 +61,13 @@ def recommend_projects_for_profile(profile, limit=6, user_plan_tier="explorer"):
 
         scored.append((score, project))
 
-    scored.sort(key=lambda item: (-item[0], item[1].title.lower(), item[1].id))
+    excluded_ids = {int(project_id) for project_id in (exclude_project_ids or []) if project_id}
+    random.shuffle(scored)
+    fresh_scored = [item for item in scored if item[1].id not in excluded_ids]
+    fallback_scored = [item for item in scored if item[1].id in excluded_ids]
+    fresh_scored.sort(key=lambda item: -item[0])
+    fallback_scored.sort(key=lambda item: -item[0])
+    selected = (fresh_scored + fallback_scored)[:limit]
 
     return [
         {
@@ -95,5 +83,5 @@ def recommend_projects_for_profile(profile, limit=6, user_plan_tier="explorer"):
             "interest_tags": project.interest_tags,
             "relevance_score": score,
         }
-        for score, project in scored[:limit]
+        for score, project in selected
     ]
