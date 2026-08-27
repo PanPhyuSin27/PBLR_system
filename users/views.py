@@ -464,6 +464,7 @@ def recommendations_view(request):
         reco_limit = 6 if is_premium else 3
         usage_date = timezone.localdate()
         cached_recommendations = request.session.get("recommendations", [])
+        should_generate = request.method == "POST" or not cached_recommendations
 
         usage_record = None
         if not is_premium:
@@ -472,40 +473,36 @@ def recommendations_view(request):
                 usage_date=usage_date,
                 defaults={"count": 0},
             )
+            remaining = max(reco_limit - usage_record.count, 0)
 
-        if not is_premium and usage_record and usage_record.count >= reco_limit:
+        if not should_generate:
+            recommendations = cached_recommendations[:reco_limit]
+            if not is_premium and usage_record and usage_record.count >= reco_limit:
+                reco_limited = True
+                remaining = 0
+        elif not is_premium and usage_record and usage_record.count >= reco_limit:
             reco_limited = True
             recommendations = cached_recommendations[:reco_limit]
             remaining = 0
-            return render(
-                request,
-                "users/recommendations.html",
-                {
-                    "profile": profile,
-                    "recommendations": recommendations,
-                    "ai_generated": ai_generated,
-                    "reco_limited": reco_limited,
-                    "reco_limit": reco_limit,
-                    "reco_remaining": remaining,
-                    "premium_request_pending": premium_request_pending,
-                    "current_plan_name": current_plan_name,
-                    "is_premium_user": is_premium_user,
-                },
+            if request.method == "POST":
+                return redirect("recommendations")
+        else:
+            previous_project_ids = [project.get("id") for project in cached_recommendations if project.get("id")]
+            recommendations = recommend_projects_for_profile(
+                profile,
+                limit=reco_limit,
+                user_plan_tier=user_plan_tier,
+                exclude_project_ids=previous_project_ids,
             )
-        previous_project_ids = [project.get("id") for project in cached_recommendations if project.get("id")]
-        recommendations = recommend_projects_for_profile(
-            profile,
-            limit=reco_limit,
-            user_plan_tier=user_plan_tier,
-            exclude_project_ids=previous_project_ids,
-        )
 
-        request.session["recommendations"] = recommendations
-        _persist_recommendations(request.user, recommendations)
-        if not is_premium and usage_record:
-            usage_record.count += 1
-            usage_record.save(update_fields=["count"])
-            remaining = max(reco_limit - usage_record.count, 0)
+            request.session["recommendations"] = recommendations
+            _persist_recommendations(request.user, recommendations)
+            if not is_premium and usage_record:
+                usage_record.count += 1
+                usage_record.save(update_fields=["count"])
+                remaining = max(reco_limit - usage_record.count, 0)
+            if request.method == "POST":
+                return redirect("recommendations")
 
     return render(
         request,
@@ -776,7 +773,6 @@ def my_projects_view(request):
                 "index": project.get("index"),
                 "source": project.get("source", "recommendation"),
                 "start_url": start_url,
-                "regen_url": f"{start_url}?regen=1",
                 "title": project.get("title"),
                 "category": project.get("category"),
                 "difficulty": project.get("difficulty"),

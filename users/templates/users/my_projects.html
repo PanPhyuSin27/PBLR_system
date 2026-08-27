@@ -33,6 +33,10 @@
                     </div>
                     <div class="rec-actions">
                         <a class="btn btn-primary" href="{{ project.start_url }}">Resume</a>
+                        <form method="post" action="{% url 'recommendations' %}" style="margin: 0;">
+                            {% csrf_token %}
+                            <button class="btn" type="submit">Regenerate</button>
+                        </form>
                     </div>
                 </div>
             {% endfor %}

@@ -20,6 +20,12 @@
 {% elif reco_remaining is not None %}
     <p class="helper-text">Free tier: {{ reco_remaining }} recommendations left today.</p>
 {% endif %}
+{% if profile %}
+    <form method="post" action="{% url 'recommendations' %}" style="margin-bottom: 16px;">
+        {% csrf_token %}
+        <button class="btn btn-primary" type="submit" {% if reco_limited %}disabled{% endif %}>Regenerate</button>
+    </form>
+{% endif %}
 
 {% if not profile %}
     <div class="empty-state">
